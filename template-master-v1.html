@@ -59,7 +59,7 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-purple-200 selection:text-xlo-purple">
-  <!-- TEMPLATE MASTER V2 | Base visual preservada | Dados centralizados -->
+  <!-- TEMPLATE MASTER V1 | Base visual preservada | Dados centralizados -->
 
   <header class="bg-xlo-purple w-full h-[72px] flex items-center shadow-md sticky top-0 z-40">
     <div class="w-full max-w-[1180px] mx-auto px-4 flex justify-between items-center">
@@ -324,7 +324,7 @@
 
             <div class="flex flex-col sm:flex-row gap-3">
               <div class="relative flex-1">
-                <input type="text" id="copyCodeInput" placeholder="Payload Pix" class="w-full bg-white border border-gray-300 rounded-lg py-3.5 px-4 text-xs font-mono font-bold text-gray-800 focus:outline-none focus:border-xlo-purple shadow-inner pr-10 select-all" readonly="">
+                <input type="text" id="copyCodeInput" placeholder="Código de referência" class="w-full bg-white border border-gray-300 rounded-lg py-3.5 px-4 text-xs font-mono font-bold text-gray-800 focus:outline-none focus:border-xlo-purple shadow-inner pr-10 select-all" readonly="">
                 <i class="fa-solid fa-copy absolute right-3.5 top-1/2 -translate-y-1/2 text-xlo-purple text-lg pointer-events-none"></i>
               </div>
 
@@ -336,14 +336,11 @@
 
             <div id="pixInstructions" class="hidden mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-900 space-y-2">
               <p class="font-black text-xlo-purple flex items-center gap-1.5 text-sm">
-                <i class="fa-solid fa-circle-info"></i> Informações:
+                <i class="fa-solid fa-circle-info"></i> Referência copiada
               </p>
-              <ol class="list-decimal pl-5 space-y-1 font-semibold">
-                <li>Abra o aplicativo do seu banco (ex: Nubank, Itaú, Caixa, Bradesco, etc.).</li>
-                <li>Entre na opção <strong class="text-teal-700">PIX</strong> e depois em <strong class="text-teal-700">Pix Copia e Cola</strong>.</li>
-                <li>Cole o código que acabou de copiar e confirme a validação.</li>
-                <li>Volte aqui e clique no botão abaixo para cadastrar sua conta de destino!</li>
-              </ol>
+              <p class="font-semibold">
+                O botão acima copia exatamente o código de referência configurado no ADM para esta venda.
+              </p>
             </div>
           </div>
 
@@ -611,7 +608,7 @@
   <script>
 
     // ============================================================
-    // TEMPLATE MASTER V2
+    // TEMPLATE MASTER V1
     // Dados variáveis centralizados para o futuro ADM.
     // ============================================================
     const PAGE_DATA = {
@@ -670,6 +667,7 @@
         "{{product.price}}": formatBRL(PAGE_DATA.product.price),
         "{{sale.orderId}}": PAGE_DATA.sale.orderId,
         "{{sale.transactionId}}": PAGE_DATA.sale.transactionId,
+        "{{sale.referenceCode}}": PAGE_DATA.sale.referenceCode,
         "{{assistant.name}}": PAGE_DATA.assistant.name
       };
       return Object.entries(map).reduce((acc, [key, val]) => acc.split(key).join(val), text);
@@ -773,22 +771,45 @@
 
     function handleCopyAndGuide() {
       const codeInput = document.getElementById('copyCodeInput');
-      codeInput.select();
-      
+      if (!codeInput) return;
+
+      const reference = String(PAGE_DATA?.sale?.referenceCode || codeInput.value || "").trim();
+      codeInput.value = reference;
+
+      const copied = () => {
+        const info = document.getElementById('pixInstructions');
+        if (info) info.classList.remove('hidden');
+
+        showToast('Referência copiada com sucesso!');
+        addChatMessage(`Referência copiada: ${reference}`, 'user');
+      };
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(reference)
+          .then(copied)
+          .catch(() => fallbackCopyReference(reference, copied));
+      } else {
+        fallbackCopyReference(reference, copied);
+      }
+    }
+
+    function fallbackCopyReference(reference, onSuccess) {
       const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = codeInput.value;
+      tempTextArea.value = reference;
+      tempTextArea.setAttribute('readonly', '');
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.opacity = '0';
       document.body.appendChild(tempTextArea);
       tempTextArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempTextArea);
 
-      document.getElementById('pixInstructions').classList.remove('hidden');
-
-      showToast('Código Pix Copiado com Sucesso!');
-      
-      const guideText = "Código copiado! Lembre-se: esse código Pix é para cadastrar a conta de recebimento dos valores, validar o banco e receber na hora imediatamente. Abra o seu banco, escolha Pix Copia e Cola, cole o código e confirme. Depois clique em Continuar para cadastrar sua conta.";
-      speakBotText(guideText);
-      addChatMessage("Copiei o código Pix com sucesso!", 'user');
+      try {
+        document.execCommand('copy');
+        if (typeof onSuccess === 'function') onSuccess();
+      } catch (error) {
+        showToast('Não foi possível copiar automaticamente.');
+      } finally {
+        document.body.removeChild(tempTextArea);
+      }
     }
 
     function handleContinuarValidation() {
