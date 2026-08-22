@@ -1,11 +1,11 @@
 {
   "meta": {
     "schema": 1,
-    "updatedAt": "2026-08-22T14:29:20.859Z",
+    "updatedAt": "2026-08-22T15:14:37.602Z",
     "published": true
   },
   "branch": {
-    "code": "OFY"
+    "code": "OLX"
   },
   "seller": {
     "id": "seller_001",
@@ -29,17 +29,17 @@
     "price": 260,
     "status": "VENDIDO",
     "category": "",
-    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbplY3peJz9ury790NJtQuEHCyyfl6Q3O4ZA8_wxu0cg&s=10"
+    "image": "https://img.olx.com.br/images/85/853630792833876.webp"
   },
   "sale": {
     "pageId": "A7K29P",
     "internalName": "Venda Osmar - Cômoda",
     "orderId": "992014883",
-    "transactionId": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "referenceCode": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "status": "Processando",
+    "transactionId": "TX-992014883",
+    "referenceCode": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "status": "Pendente",
     "date": "",
-    "publishState": "Publicado"
+    "publishState": "Rascunho"
   },
   "assistant": {
     "name": "Ana",
