@@ -69,6 +69,7 @@ code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius
       <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="diagnostics"><i class="fa-solid fa-stethoscope w-6"></i>Diagnóstico</button>
       <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="pages"><i class="fa-solid fa-layer-group w-6"></i>Minhas páginas</button>
       <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="history"><i class="fa-solid fa-clock-rotate-left w-6"></i>Histórico</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="debug"><i class="fa-solid fa-bug w-6"></i>Super Debug</button>
       <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="backup"><i class="fa-solid fa-shield-halved w-6"></i>Backup / Recuperação</button>
     </div>
 
@@ -369,6 +370,85 @@ code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius
             <button onclick="clearHistory()" class="px-4 py-2 rounded-xl bg-slate-800 text-sm font-bold">Limpar</button>
           </div>
           <div id="historyList" class="mt-5 space-y-2"></div>
+        </div>
+      </section>
+
+
+      <!-- SUPER DEBUG -->
+      <section id="debug" class="section">
+        <div class="grid xl:grid-cols-[1fr_420px] gap-5">
+          <div class="glass rounded-2xl p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 class="text-xl font-black">Super Debug de Publicação</h2>
+                <p class="text-sm text-slate-400 mt-1">Diagnóstico técnico do ADM → Netlify Function → GitHub.</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="runSuperDebug()" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 font-black text-sm">
+                  <i class="fa-solid fa-stethoscope mr-2"></i>Executar tudo
+                </button>
+                <button onclick="copyDebugReport()" class="px-4 py-2.5 rounded-xl bg-slate-800 font-bold text-sm">
+                  <i class="fa-solid fa-copy mr-2"></i>Copiar relatório
+                </button>
+                <button onclick="clearDebug()" class="px-4 py-2.5 rounded-xl bg-slate-800 font-bold text-sm">
+                  Limpar
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-5 grid md:grid-cols-2 gap-3 text-sm">
+              <div class="pill rounded-xl p-4">
+                <div class="text-xs text-slate-500 uppercase">Origem do ADM</div>
+                <div id="dbgOrigin" class="terminal mt-2 break-all">-</div>
+              </div>
+              <div class="pill rounded-xl p-4">
+                <div class="text-xs text-slate-500 uppercase">Endpoint esperado</div>
+                <div id="dbgEndpoint" class="terminal mt-2 break-all">/.netlify/functions/save-page</div>
+              </div>
+            </div>
+
+            <div id="debugChecks" class="mt-5 space-y-2"></div>
+
+            <div class="mt-5">
+              <div class="flex items-center justify-between">
+                <h3 class="font-black">Console técnico</h3>
+                <span id="debugFinalBadge" class="text-xs font-black px-2 py-1 rounded bg-slate-800">Aguardando</span>
+              </div>
+              <pre id="debugConsole" class="terminal mt-3 bg-black/50 border border-slate-800 rounded-2xl p-4 min-h-[330px] max-h-[620px] overflow-auto text-xs whitespace-pre-wrap break-words text-slate-300"></pre>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <div class="glass rounded-2xl p-6">
+              <h3 class="font-black text-lg">Teste rápido da Function</h3>
+              <p class="text-sm text-slate-400 mt-1">Se retornar 404, a Function não foi publicada pelo Netlify.</p>
+              <button onclick="debugFunctionHealth()" class="w-full mt-4 px-4 py-3 rounded-xl bg-emerald-500 text-black font-black">
+                Testar save-page
+              </button>
+              <div id="dbgFunctionHealth" class="mt-4 text-sm"></div>
+            </div>
+
+            <div class="glass rounded-2xl p-6">
+              <h3 class="font-black text-lg">Causas comuns de 404</h3>
+              <div class="mt-4 space-y-2 text-sm text-slate-300">
+                <div class="pill rounded-xl p-3">1. <span class="terminal">save-page.mjs</span> não entrou no deploy.</div>
+                <div class="pill rounded-xl p-3">2. Pasta diferente de <span class="terminal">netlify/functions</span>.</div>
+                <div class="pill rounded-xl p-3">3. <span class="terminal">netlify.toml</span> não está na raiz publicada.</div>
+                <div class="pill rounded-xl p-3">4. Base directory / publish directory apontando para outra pasta.</div>
+                <div class="pill rounded-xl p-3">5. Deploy antigo ainda ativo.</div>
+              </div>
+            </div>
+
+            <div class="glass rounded-2xl p-6">
+              <h3 class="font-black text-lg">Dados do teste</h3>
+              <div class="mt-4 text-sm space-y-2">
+                <div class="flex justify-between gap-3"><span class="text-slate-500">Page ID</span><b id="dbgPageId" class="terminal">-</b></div>
+                <div class="flex justify-between gap-3"><span class="text-slate-500">Último HTTP</span><b id="dbgLastHttp">-</b></div>
+                <div class="flex justify-between gap-3"><span class="text-slate-500">Function</span><b id="dbgFunctionState">-</b></div>
+                <div class="flex justify-between gap-3"><span class="text-slate-500">GitHub</span><b id="dbgGithubState">-</b></div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -838,7 +918,6 @@ async function publishPage() {
   const d = collectData();
 
   await checkImage(false);
-
   const diag = runDiagnostics(false);
 
   if (diag.score < 85) {
@@ -849,59 +928,42 @@ async function publishPage() {
 
   const confirmar = await confirmBox(
     "Publicar página?",
-    "Os dados serão enviados ao GitHub e o Netlify fará o deploy."
+    "Os dados serão enviados ao GitHub pela Netlify Function save-page."
   );
-
   if (!confirmar) return;
 
   createSnapshot("Antes da publicação");
-
   $("sidebarState").textContent = "Publicando...";
   $("sidebarState").className = "text-amber-400";
-
-  $("topSaveStatus").textContent = "Enviando para GitHub...";
+  $("topSaveStatus").textContent = "Chamando Netlify Function...";
   $("topSaveStatus").className = "text-amber-400";
 
   try {
-    const resposta = await fetch(
-      "/.netlify/functions/save-page",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(d)
-      }
-    );
+    const resposta = await fetch("/.netlify/functions/save-page", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(d)
+    });
 
+    const raw = await resposta.text();
     let resultado = {};
-
-    try {
-      resultado = await resposta.json();
-    } catch {
-      throw new Error(
-        "A função respondeu sem JSON válido. Verifique os logs da função no Netlify."
-      );
-    }
+    try { resultado = JSON.parse(raw); }
+    catch { resultado = { error: raw || "Resposta vazia" }; }
 
     if (!resposta.ok || !resultado.ok) {
-      throw new Error(
-        resultado.error ||
-        `Falha na publicação (${resposta.status})`
-      );
+      const err = new Error(resultado.error || `HTTP ${resposta.status}`);
+      err.httpStatus = resposta.status;
+      err.responseBody = resultado;
+      throw err;
     }
 
     d.sale.publishState = "Publicado";
-
-    const index = state.pages.findIndex(
-      p => p.sale.pageId === d.sale.pageId
-    );
-
-    if (index >= 0) {
-      state.pages[index] = d;
-    } else {
-      state.pages.push(d);
-    }
+    const index = state.pages.findIndex(p => p.sale.pageId === d.sale.pageId);
+    if (index >= 0) state.pages[index] = d;
+    else state.pages.push(d);
 
     persistPages();
     renderPages();
@@ -909,36 +971,25 @@ async function publishPage() {
 
     $("sidebarState").textContent = "Publicado";
     $("sidebarState").className = "text-emerald-400";
-
     $("topSaveStatus").textContent = "GitHub atualizado";
     $("topSaveStatus").className = "text-emerald-400";
 
-    log(
-      `Página ${d.sale.pageId} enviada ao GitHub. Commit: ${resultado.commitSha || "criado"}`
-    );
-
-    toast(
-      `Publicado: ${resultado.pageUrl || "/p/" + d.sale.pageId + "/"}`
-    );
+    log(`Página ${d.sale.pageId} enviada ao GitHub. Commit: ${resultado.commitSha || "criado"}`);
+    toast(`Publicado: ${resultado.pageUrl || "/p/" + d.sale.pageId + "/"}`);
 
   } catch (erro) {
     console.error("Erro ao publicar:", erro);
 
     $("sidebarState").textContent = "Erro";
     $("sidebarState").className = "text-red-400";
-
-    $("topSaveStatus").textContent = "Falha na publicação";
+    $("topSaveStatus").textContent = `Falha HTTP ${erro.httpStatus || ""}`.trim();
     $("topSaveStatus").className = "text-red-400";
 
-    log(
-      "Erro de publicação: " +
-      (erro?.message || "erro desconhecido")
-    );
+    log("Erro de publicação: " + (erro?.message || "erro desconhecido"));
+    toast("Falha ao publicar — abrindo Super Debug.");
 
-    toast(
-      "Erro: " +
-      (erro?.message || "falha ao publicar")
-    );
+    openSection("debug");
+    setTimeout(runSuperDebug, 250);
   }
 }
 
@@ -1037,6 +1088,231 @@ document.addEventListener("keydown",e=>{
   if(draft){try{assignData(JSON.parse(draft));$("topSaveStatus").textContent="Rascunho recuperado";$("sidebarState").textContent="Rascunho recuperado"}catch{}}
   snapshotUndo();renderPages();renderHistory();renderSnapshots();renderSellerProfiles();sync(false);checkImage(false);
 })();
+
+// ============================================================
+// SUPER DEBUG — PUBLICAÇÃO / NETLIFY / GITHUB
+// ============================================================
+const DEBUG_ENDPOINT = "/.netlify/functions/save-page";
+const debugState = { lines: [], last: null };
+
+function dbgLog(label, data, level="info"){
+  const stamp = new Date().toLocaleTimeString("pt-BR");
+  let rendered;
+  if (typeof data === "string") rendered = data;
+  else {
+    try { rendered = JSON.stringify(data, null, 2); }
+    catch { rendered = String(data); }
+  }
+  const prefix = level === "error" ? "❌" : level === "ok" ? "✅" : level === "warn" ? "⚠️" : "•";
+  const line = `[${stamp}] ${prefix} ${label}\n${rendered}`;
+  debugState.lines.push(line);
+  if ($("debugConsole")) $("debugConsole").textContent = debugState.lines.join("\n\n");
+}
+
+function setDbg(id, value, cls=""){
+  const el=$(id); if(!el)return;
+  el.textContent=value;
+  if(cls) el.className=cls;
+}
+
+function addDebugCheck(name, ok, detail=""){
+  const box=$("debugChecks"); if(!box)return;
+  const row=document.createElement("div");
+  row.className="pill rounded-xl px-4 py-3 flex items-start justify-between gap-4";
+  row.innerHTML = `
+    <div>
+      <div class="font-bold">${esc(name)}</div>
+      ${detail ? `<div class="text-xs text-slate-500 mt-1 break-all">${esc(detail)}</div>` : ""}
+    </div>
+    <div class="${ok===true?"text-emerald-400":ok===false?"text-red-400":"text-amber-400"} font-black whitespace-nowrap">
+      ${ok===true?"✓ OK":ok===false?"✕ FALHA":"… TESTE"}
+    </div>`;
+  box.appendChild(row);
+}
+
+function clearDebug(){
+  debugState.lines=[];
+  if($("debugConsole")) $("debugConsole").textContent="";
+  if($("debugChecks")) $("debugChecks").innerHTML="";
+  setDbg("debugFinalBadge","Aguardando","text-xs font-black px-2 py-1 rounded bg-slate-800");
+  setDbg("dbgLastHttp","-");
+  setDbg("dbgFunctionState","-");
+  setDbg("dbgGithubState","-");
+  if($("dbgFunctionHealth")) $("dbgFunctionHealth").innerHTML="";
+}
+
+async function readResponseSafely(res){
+  const text=await res.text();
+  let parsed=null;
+  try{ parsed=JSON.parse(text); }catch{}
+  return { text, parsed };
+}
+
+async function debugFunctionHealth(){
+  clearDebug();
+  setDbg("dbgOrigin",location.origin);
+  setDbg("dbgEndpoint",DEBUG_ENDPOINT);
+  setDbg("dbgPageId",field("pageId")||"-");
+
+  dbgLog("TESTE GET DA FUNCTION", `${location.origin}${DEBUG_ENDPOINT}?debug=1`);
+
+  try{
+    const res=await fetch(DEBUG_ENDPOINT+"?debug=1",{
+      method:"GET",
+      cache:"no-store",
+      headers:{"Accept":"application/json"}
+    });
+    const body=await readResponseSafely(res);
+    setDbg("dbgLastHttp",String(res.status));
+    debugState.last={status:res.status,body:body.parsed||body.text};
+
+    dbgLog(`HTTP ${res.status} ${res.statusText}`, body.parsed||body.text, res.ok?"ok":"error");
+
+    if(res.status===404){
+      setDbg("dbgFunctionState","NÃO ENCONTRADA","text-red-400 font-black");
+      $("dbgFunctionHealth").innerHTML =
+        '<div class="text-red-400 font-black">✕ 404 NOT FOUND</div>'+
+        '<div class="text-xs text-slate-400 mt-2">Isso ocorre antes do GitHub. O Netlify não publicou a Function nesse deploy.</div>';
+      addDebugCheck("Netlify Function save-page",false,"404 — endpoint não existe no deploy atual");
+      return {ok:false,stage:"netlify-function",status:404};
+    }
+
+    if(!res.ok){
+      setDbg("dbgFunctionState","ERRO "+res.status,"text-red-400 font-black");
+      $("dbgFunctionHealth").innerHTML = `<div class="text-red-400 font-black">✕ HTTP ${res.status}</div>`;
+      addDebugCheck("Netlify Function save-page",false,`HTTP ${res.status}`);
+      return {ok:false,stage:"function-response",status:res.status,body:body.parsed||body.text};
+    }
+
+    setDbg("dbgFunctionState","ONLINE","text-emerald-400 font-black");
+    $("dbgFunctionHealth").innerHTML =
+      '<div class="text-emerald-400 font-black">✓ Function encontrada</div>'+
+      `<pre class="terminal text-xs mt-2 whitespace-pre-wrap">${esc(JSON.stringify(body.parsed||body.text,null,2))}</pre>`;
+    addDebugCheck("Netlify Function save-page",true,"Endpoint respondeu");
+    if(body.parsed?.github?.reachable===true){
+      setDbg("dbgGithubState","ONLINE","text-emerald-400 font-black");
+    } else if(body.parsed?.github?.reachable===false){
+      setDbg("dbgGithubState","FALHA","text-red-400 font-black");
+    }
+    return {ok:true,status:res.status,data:body.parsed||body.text};
+  }catch(err){
+    dbgLog("ERRO DE REDE AO CHAMAR FUNCTION",err?.stack||err?.message||String(err),"error");
+    setDbg("dbgFunctionState","ERRO DE REDE","text-red-400 font-black");
+    addDebugCheck("Netlify Function save-page",false,err?.message||"erro de rede");
+    return {ok:false,stage:"network",error:err?.message};
+  }
+}
+
+async function debugStaticPath(path,label){
+  try{
+    const res=await fetch(path,{method:"GET",cache:"no-store"});
+    const body=await res.text();
+    addDebugCheck(label,res.ok,`${path} → HTTP ${res.status}`);
+    dbgLog(`${label} — HTTP ${res.status}`, body.slice(0,500), res.ok?"ok":"error");
+    return res.ok;
+  }catch(err){
+    addDebugCheck(label,false,err?.message||"erro de rede");
+    dbgLog(`${label} — ERRO`,err?.message||String(err),"error");
+    return false;
+  }
+}
+
+async function debugPublishPost(){
+  const d=collectData();
+  dbgLog("POST DE DEBUG PARA SAVE-PAGE",{
+    endpoint:DEBUG_ENDPOINT,
+    pageId:d.sale?.pageId,
+    branch:d.branch?.code,
+    seller:d.seller?.name,
+    product:d.product?.title
+  });
+
+  try{
+    const res=await fetch(DEBUG_ENDPOINT+"?debugPost=1",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify({...d,__debug:true})
+    });
+    const body=await readResponseSafely(res);
+    setDbg("dbgLastHttp",String(res.status));
+    dbgLog(`POST HTTP ${res.status} ${res.statusText}`,body.parsed||body.text,res.ok?"ok":"error");
+
+    if(!res.ok){
+      addDebugCheck("POST de publicação",false,`HTTP ${res.status}: ${body.parsed?.error||body.text.slice(0,180)}`);
+      return false;
+    }
+    addDebugCheck("POST de publicação",true,body.parsed?.path||"GitHub respondeu com sucesso");
+    return true;
+  }catch(err){
+    addDebugCheck("POST de publicação",false,err?.message||"erro de rede");
+    dbgLog("POST FALHOU",err?.stack||err?.message||String(err),"error");
+    return false;
+  }
+}
+
+async function runSuperDebug(){
+  clearDebug();
+  setDbg("dbgOrigin",location.origin);
+  setDbg("dbgEndpoint",DEBUG_ENDPOINT);
+  setDbg("dbgPageId",field("pageId")||"-");
+  setDbg("debugFinalBadge","Executando...","text-xs font-black px-2 py-1 rounded bg-amber-500/10 text-amber-400");
+
+  dbgLog("INÍCIO DO SUPER DEBUG",{
+    origin:location.origin,
+    pathname:location.pathname,
+    userAgent:navigator.userAgent,
+    pageId:field("pageId")
+  });
+
+  const staticAdm = await debugStaticPath("/adm/","ADM /adm/");
+  const staticTemplate = await debugStaticPath("/template-master-v1.html","Template mestre");
+  const testId=field("pageId")||"A7K29P";
+  const staticJson = await debugStaticPath(`/data/pages/${encodeURIComponent(testId)}.json`,"JSON da página");
+
+  const health=await debugFunctionHealth();
+
+  if(!health.ok){
+    setDbg("debugFinalBadge","Falha antes do GitHub","text-xs font-black px-2 py-1 rounded bg-red-500/10 text-red-400");
+    dbgLog("CONCLUSÃO", health.status===404
+      ? "A falha é 404 na Netlify Function. O GitHub ainda nem está sendo chamado. Verifique se netlify/functions/save-page.mjs entrou no deploy, se netlify.toml está na raiz e se a Base directory/Publish directory do Netlify aponta para a pasta correta."
+      : "A Function foi chamada, mas respondeu erro. Veja o corpo HTTP acima.","error");
+    return;
+  }
+
+  addDebugCheck("Configuração da Function",health.data?.env?.ok===true,health.data?.env?.message||"Ver resposta do health");
+  if(health.data?.github){
+    addDebugCheck("Acesso ao repositório GitHub",health.data.github.reachable===true,
+      health.data.github.message||`HTTP ${health.data.github.status||"-"}`);
+  }
+
+  const postOk=await debugPublishPost();
+
+  setDbg("debugFinalBadge",postOk?"Tudo operacional":"Erro identificado",
+    `text-xs font-black px-2 py-1 rounded ${postOk?"bg-emerald-500/10 text-emerald-400":"bg-red-500/10 text-red-400"}`);
+
+  dbgLog("CONCLUSÃO",postOk
+    ? "ADM → Netlify Function → GitHub respondeu com sucesso."
+    : "A Function existe, mas o POST falhou. O console acima mostra o status e o erro exato.","info");
+}
+
+async function copyDebugReport(){
+  const report=[
+    "ABRAVANEL ADMIN — SUPER DEBUG",
+    "Data: "+new Date().toLocaleString("pt-BR"),
+    "Origin: "+location.origin,
+    "Endpoint: "+DEBUG_ENDPOINT,
+    "Page ID: "+field("pageId"),
+    "",
+    ...debugState.lines
+  ].join("\n");
+  try{
+    await navigator.clipboard.writeText(report);
+    toast("Relatório de debug copiado.");
+  }catch{
+    toast("Não foi possível copiar automaticamente.");
+  }
+}
+
 </script>
 </body>
 </html>
