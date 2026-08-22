@@ -1,6 +1,5 @@
 // netlify/functions/save-page.mjs
-// Abravanel Admin — save-page com diagnóstico seguro.
-// Nunca retorna o conteúdo do GITHUB_TOKEN.
+// Abravanel Admin — save-page com token enviado pela sessão do ADM.
 
 const API_VERSION = "2022-11-28";
 
@@ -12,18 +11,16 @@ export default async (req) => {
     // GET = HEALTH CHECK / SUPER DEBUG
     // ============================================================
     if (req.method === "GET") {
-      const token = process.env.GITHUB_TOKEN || "";
+      const token = getSessionToken(req);
 
-// EDITE SOMENTE ESTAS DUAS LINHAS
-const owner = "marcellofrancisco2000-pixel";
-const repo = "olx";
-
-const branch = "main";
+      const owner = "marcellofrancisco2000-pixel";
+      const repo = "olx";
+      const branch = "main";
 
       const missing = [];
 
       if (!token) {
-        missing.push("GITHUB_TOKEN");
+        missing.push("SESSION_GITHUB_TOKEN");
       }
 
       if (!owner) {
@@ -50,7 +47,7 @@ const branch = "main";
 
           message: missing.length
             ? `Variáveis ausentes: ${missing.join(", ")}`
-            : "Variáveis necessárias encontradas.",
+            : "Token da sessão recebido.",
 
           tokenPresent: Boolean(token),
 
@@ -104,9 +101,7 @@ const branch = "main";
           }
         } catch (error) {
           health.github.reachable = false;
-
-          health.github.message =
-            error.message;
+          health.github.message = error.message;
         }
       }
 
@@ -133,15 +128,13 @@ const branch = "main";
 
           stage: "method",
 
-          error:
-            "Método não permitido"
+          error: "Método não permitido"
         },
         405
       );
     }
 
-    const body =
-      await req.json();
+    const body = await req.json();
 
     // ============================================================
     // ID DA PÁGINA
@@ -162,8 +155,7 @@ const branch = "main";
 
           stage: "validation",
 
-          error:
-            "ID da página não informado"
+          error: "ID da página não informado"
         },
         400
       );
@@ -182,8 +174,7 @@ const branch = "main";
 
           stage: "validation",
 
-          error:
-            "Formato de ID inválido",
+          error: "Formato de ID inválido",
 
           pageId
         },
@@ -192,26 +183,22 @@ const branch = "main";
     }
 
     // ============================================================
-    // VARIÁVEIS DO NETLIFY
+    // TOKEN DA SESSÃO + CONFIGURAÇÃO DO GITHUB
     // ============================================================
 
-    const token = process.env.GITHUB_TOKEN || "";
+    const token = getSessionToken(req);
 
-    const owner =
-      process.env.GITHUB_OWNER || "";
+    const owner = "marcellofrancisco2000-pixel";
 
-    const repo =
-      process.env.GITHUB_REPO || "";
+    const repo = "olx";
 
-    const branch =
-      process.env.GITHUB_BRANCH ||
-      "main";
+    const branch = "main";
 
     const missing = [];
 
     if (!token) {
       missing.push(
-        "GITHUB_TOKEN"
+        "SESSION_GITHUB_TOKEN"
       );
     }
 
@@ -234,8 +221,7 @@ const branch = "main";
 
           requestId,
 
-          stage:
-            "environment",
+          stage: "environment",
 
           error:
             `Variáveis ausentes: ${missing.join(", ")}`,
@@ -397,8 +383,10 @@ const branch = "main";
       }
     };
 
-    // Remove flag interna de debug
+    // Remove flags/campos internos
     delete pageData.__debug;
+    delete pageData.githubToken;
+    delete pageData.token;
 
     const jsonText =
       JSON.stringify(
@@ -580,6 +568,20 @@ const branch = "main";
 
 
 // ============================================================
+// TOKEN RECEBIDO DO ADM
+// FICA SOMENTE NA SESSÃO DO NAVEGADOR
+// ============================================================
+
+function getSessionToken(req) {
+  const token =
+    req.headers.get("x-github-token") ||
+    "";
+
+  return token.trim();
+}
+
+
+// ============================================================
 // HEADERS DO GITHUB
 // ============================================================
 
@@ -648,7 +650,10 @@ function response(
           "application/json; charset=utf-8",
 
         "Cache-Control":
-          "no-store"
+          "no-store",
+
+        "Access-Control-Allow-Headers":
+          "Content-Type, Accept, X-GitHub-Token"
       }
     }
   );
