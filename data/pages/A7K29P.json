@@ -1,11 +1,11 @@
 {
   "meta": {
     "schema": 1,
-    "updatedAt": "2026-08-22T15:16:31.703Z",
+    "updatedAt": "2026-08-22T15:18:14.260Z",
     "published": true
   },
   "branch": {
-    "code": "XLO"
+    "code": "OLXX"
   },
   "seller": {
     "id": "seller_001",
@@ -36,10 +36,10 @@
     "internalName": "Venda Osmar - Cômoda",
     "orderId": "992014883",
     "transactionId": "TX-992014883",
-    "referenceCode": "XLO-992014883",
-    "status": "Rascunho",
+    "referenceCode": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "status": "Pendente",
     "date": "",
-    "publishState": "Rascunho"
+    "publishState": "Publicado"
   },
   "assistant": {
     "name": "Ana",
