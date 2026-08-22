@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "schema": 1,
+    "status": "published"
+  },
+
+  "branch": {
+    "code": "XLO"
+  },
+
+  "seller": {
+    "id": "seller_001",
+    "name": "Patricia Medina",
+    "firstName": "Patricia",
+    "initial": "P",
+    "verifiedLabel": "Vendedor Verificado",
+    "avatar": ""
+  },
+
+  "buyer": {
+    "name": "Osmar Britz",
+    "firstName": "Osmar",
+    "city": "São Luiz Gonzaga",
+    "state": "RS",
+    "cep": "",
+    "region": ""
+  },
+
+  "product": {
+    "title": "Cômoda",
+    "description": "Cômoda",
+    "price": 260,
+    "status": "VENDIDO",
+    "category": "",
+    "image": "https://img.olx.com.br/images/85/853630792833876.webp"
+  },
+
+  "sale": {
+    "pageId": "A7K29P",
+    "internalName": "Venda Osmar - Cômoda",
+    "orderId": "992014883",
+    "transactionId": "TX-992014883",
+    "status": "Rascunho",
+    "date": ""
+  },
+
+  "assistant": {
+    "name": "Ana",
+    "voiceEnabled": true,
+
+    "welcome":
+      "Olá, {{buyer.firstName}}! Sou a {{assistant.name}} da {{branch.code}}.",
+
+    "instruction":
+      "Esta página mostra os detalhes da venda de {{product.title}}."
+  }
+}
