@@ -359,7 +359,7 @@ code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius
           <div id="previewStatus" class="mt-4 text-xs text-slate-400"></div>
           <div class="preview-shell mt-4 p-3 overflow-auto">
             <div id="previewStage" class="preview-stage desktop">
-              <iframe id="sitePreview" src="template-master-v1.html" title="Preview"></iframe>
+              <iframe id="sitePreview" src="/template-master-v1.html" title="Preview"></iframe>
             </div>
           </div>
         </div>
@@ -875,7 +875,7 @@ $("sellerProfileSelect").addEventListener("change",e=>{
 
 function validateVariables(showToast=false){
   const d=collectData();
-  const allowed=["branch.code","seller.name","seller.firstName","buyer.name","buyer.firstName","product.title","product.price","assistant.name","sale.orderId","sale.transactionId"];
+  const allowed=["branch.code","seller.name","seller.firstName","buyer.name","buyer.firstName","product.title","product.price","assistant.name","sale.orderId","sale.transactionId","sale.referenceCode"];
   const combined=[d.assistant.welcome,d.assistant.instruction].join("\n");
   const found=[...combined.matchAll(/\{\{\s*([^}]+?)\s*\}\}/g)].map(m=>m[1]);
   const invalid=found.filter(v=>!allowed.includes(v));
@@ -982,7 +982,8 @@ function resolveVars(t,d){
     "{{product.price}}":d.product.price.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}),
     "{{assistant.name}}":d.assistant.name,
     "{{sale.orderId}}":d.sale.orderId,
-    "{{sale.transactionId}}":d.sale.transactionId
+    "{{sale.transactionId}}":d.sale.transactionId,
+    "{{sale.referenceCode}}":d.sale.referenceCode
   };
   return Object.entries(vars).reduce((a,[k,v])=>a.split(k).join(v),t||"");
 }
@@ -1007,7 +1008,7 @@ function refreshPreview(){
     iframe.contentWindow.location.reload();
     $("previewStatus").textContent="Atualizando template...";
   }catch(e){
-    iframe.src="template-master-v1.html?ts="+Date.now();
+    iframe.src="/template-master-v1.html?ts="+Date.now();
   }
 }
 
@@ -1023,25 +1024,63 @@ function applyPreviewData(){
       Object.assign(w.PAGE_DATA.buyer,d.buyer);
       Object.assign(w.PAGE_DATA.product,d.product);
       Object.assign(w.PAGE_DATA.sale,{
-        orderId:d.sale.orderId,
-        transactionId:d.sale.transactionId,
-        status:d.sale.status,
+        ...d.sale,
         referenceCode:d.sale.referenceCode || d.sale.pageId
       });
       Object.assign(w.PAGE_DATA.assistant,d.assistant);
       if(typeof w.applyPageData==="function")w.applyPageData();
       $("previewStatus").innerHTML='<span class="text-emerald-400 font-bold">✓ Preview sincronizado com o ADM.</span>';
     }else{
-      // fallback de IDs conhecidos
+      // fallback de compatibilidade
+      const branchCode=(d.branch.code||"XLO").toUpperCase();
+
       const map={
-        brandLogoText:d.branch.code,displayBuyerName:d.buyer.name,
+        brandLogoText:branchCode,
+        displayBuyerName:d.buyer.name,
         displayLocation:`${d.buyer.city}, ${d.buyer.state}`,
-        displayProductTitle:d.product.title
+        displayProductTitle:d.product.title,
+        assistantWelcome:resolveVars(d.assistant.welcome,d)
       };
-      Object.entries(map).forEach(([id,val])=>{const el=doc.getElementById(id);if(el)el.textContent=val});
+
+      Object.entries(map).forEach(([id,val])=>{
+        const el=doc.getElementById(id);
+        if(el)el.textContent=val;
+      });
+
+      doc.title=`Minha Conta - ${branchCode} | Painel de Controle`;
+
+      doc.querySelectorAll("[data-branch-code]").forEach(el=>{
+        el.textContent=branchCode;
+      });
+
+      doc.querySelectorAll("[data-assistant-name]").forEach(el=>{
+        el.textContent=d.assistant.name;
+      });
+
+      doc.querySelectorAll("[data-seller-name]").forEach(el=>{
+        el.textContent=d.seller.name;
+      });
+
+      doc.querySelectorAll("[data-seller-initial]").forEach(el=>{
+        el.textContent=d.seller.initial;
+      });
+
+      doc.querySelectorAll("[data-seller-verified]").forEach(el=>{
+        el.textContent=d.seller.verifiedLabel;
+      });
+
+      const reference=doc.getElementById("copyCodeInput");
+      if(reference)reference.value=d.sale.referenceCode||d.sale.pageId;
+
       const price=Number(d.product.price||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-      ["displayProductPrice","badgeWalletVal","boxAmount","resumoPending","carteiraCustodyVal"].forEach(id=>{const el=doc.getElementById(id);if(el)el.textContent=price});
-      const img=doc.getElementById("productPhoto");if(img)img.src=d.product.image;
+      ["displayProductPrice","badgeWalletVal","boxAmount","resumoPending","carteiraCustodyVal"].forEach(id=>{
+        const el=doc.getElementById(id);
+        if(el)el.textContent=price;
+      });
+
+      const img=doc.getElementById("productPhoto");
+      if(img)img.src=d.product.image;
+
       $("previewStatus").innerHTML='<span class="text-amber-400 font-bold">⚠ Preview aplicado em modo compatibilidade.</span>';
     }
   }catch(e){
