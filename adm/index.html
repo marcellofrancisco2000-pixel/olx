@@ -568,7 +568,7 @@ let SESSION_GITHUB_TOKEN = "";
 function authHeaders(extra = {}){
   const headers = {...extra};
   if(SESSION_GITHUB_TOKEN){
-    headers["Authorization"] = `Bearer ${SESSION_GITHUB_TOKEN}`;
+    headers["X-GitHub-Token"] = SESSION_GITHUB_TOKEN;
   }
   return headers;
 }
