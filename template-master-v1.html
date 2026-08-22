@@ -2,7 +2,7 @@
 <html lang="pt-BR"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minha Conta - XLO | Painel de Controle</title>
+  <title>Minha Conta | Painel de Controle</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -69,7 +69,7 @@
         <a href="#" onclick="switchTab('vendas')" class="text-3xl font-black text-white tracking-tighter flex items-center gap-1"><span id="brandLogoText">XLO</span></a>
         <div class="hidden sm:flex items-center bg-white/10 text-white text-xs px-3 py-1.5 rounded-full border border-white/20">
           <i class="fa-solid fa-shield-halved text-xlo-orange mr-1.5"></i>
-          Central XLO
+          Central <span data-branch-code>XLO</span>
         </div>
       </div>
 
@@ -83,7 +83,7 @@
         </div>
 
         <button onclick="toggleBot()" class="bg-xlo-orange hover:bg-xlo-orangeHover text-white font-extrabold py-2 px-4 rounded-full transition-all shadow-md text-xs uppercase tracking-wide flex items-center gap-1.5">
-          <i class="fa-solid fa-headset text-sm"></i> Assistente XLO
+          <i class="fa-solid fa-headset text-sm"></i> Assistente <span data-branch-code>XLO</span>
         </button>
       </div>
     </div>
@@ -164,7 +164,7 @@
             <span class="font-extrabold text-xlo-title uppercase tracking-wider text-[10px]">Status da Venda:</span>
             <span id="sidebarStatusTag" class="bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded text-[10px]">Custódia Segura</span>
           </div>
-          <p class="text-[11px] text-gray-500">Valor protegido pela Ambiente XLO até a validação do código.</p>
+          <p class="text-[11px] text-gray-500">Valor protegido pela Ambiente <span data-branch-code>XLO</span> até a validação do código.</p>
         </div>
 
       </div>
@@ -197,7 +197,7 @@
           <div class="bg-purple-50/70 px-6 py-3 border-b border-xlo-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-xlo-grayText font-semibold">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-shield-halved text-xlo-purple text-sm"></i>
-              <span>Venda com Intermediação <strong class="text-xlo-purple">XLO</strong></span>
+              <span>Venda com Intermediação <strong class="text-xlo-purple" data-branch-code>XLO</strong></span>
             </div>
             <div>ID da Transação: <span class="font-mono text-xlo-dark font-bold">#<span data-transaction-id>TX-992014883</span></span></div>
           </div>
@@ -270,7 +270,7 @@
               </div>
               <div>
                 <p class="font-bold text-xlo-title text-sm">1. Pagamento Confirmado</p>
-                <p class="text-xs text-gray-500">Comprador pagou via Pix/XLO</p>
+                <p class="text-xs text-gray-500">Comprador pagou via Pix/<span data-branch-code>XLO</span></p>
               </div>
             </div>
 
@@ -363,7 +363,7 @@
           
           <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <button onclick="switchTab('carteira')" class="bg-xlo-purple hover:bg-xlo-purpleHover text-white font-extrabold py-3 px-6 rounded-full transition-colors text-sm shadow">
-              <i class="fa-solid fa-wallet mr-2"></i> Ver Saldo na Carteira XLO
+              <i class="fa-solid fa-wallet mr-2"></i> Ver Saldo na Carteira <span data-branch-code>XLO</span>
             </button>
             <button onclick="switchTab('resumo')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold py-3 px-6 rounded-full transition-colors text-sm">
               <i class="fa-solid fa-house mr-2"></i> Voltar ao Resumo
@@ -406,7 +406,7 @@
             <div>
               <p class="text-xs font-bold text-gray-500 uppercase">Anúncios</p>
               <p class="text-xl font-black text-xlo-title">1 Vendido</p>
-              <p class="text-[10px] text-xlo-purple font-bold">Ambiente XLO</p>
+              <p class="text-[10px] text-xlo-purple font-bold">Ambiente <span data-branch-code>XLO</span></p>
             </div>
           </div>
         </div>
@@ -485,8 +485,8 @@
       <section id="view-configuracoes" class="tab-content space-y-5">
         <h1 class="text-2xl font-black text-xlo-title">Configurações do Perfil</h1>
         <div class="bg-white rounded-xl shadow-sm border border-xlo-border p-6 space-y-4">
-          <p class="text-xs font-bold text-gray-700">Nome: Patricia Medina</p>
-          <p class="text-xs font-bold text-gray-700">Status: Verificado</p>
+          <p class="text-xs font-bold text-gray-700">Nome: <span data-seller-name>Patricia Medina</span></p>
+          <p class="text-xs font-bold text-gray-700">Status: <span data-seller-verified>Vendedor Verificado</span></p>
         </div>
       </section>
 
@@ -534,7 +534,7 @@
 
         <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-amber-800 text-[11px] flex items-start gap-2">
           <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
-          <span>Certifique-se de que a chave Pix pertence ao mesmo titular da conta XLO para evitar bloqueios de segurança.</span>
+          <span>Certifique-se de que a chave Pix pertence ao mesmo titular da conta <span data-branch-code>XLO</span> para evitar bloqueios de segurança.</span>
         </div>
       </div>
 
@@ -558,7 +558,7 @@
             <i class="fa-solid fa-robot"></i>
           </div>
           <div>
-            <h3 class="font-black text-sm">Ana - Assistente XLO Pay</h3>
+            <h3 id="assistantHeaderTitle" class="font-black text-sm"><span data-assistant-name>Ana</span> - Assistente <span data-branch-code>XLO</span></h3>
             <p class="text-[10px] text-purple-200 flex items-center gap-1">
               <span class="w-2 h-2 rounded-full bg-green-400"></span> Online com Voz Ativa
             </p>
@@ -575,7 +575,7 @@
             <i class="fa-solid fa-robot"></i>
           </div>
           <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 text-gray-800 space-y-1">
-            <p class="font-bold">Olá, Osmar! Sou a Ana do XLO Pay.</p>
+            <p id="assistantWelcome" class="font-bold">Olá, Osmar! Sou a Ana da XLO.</p>
             <p>Esse código Pix é para <strong>cadastrar a conta de recebimento dos valores</strong>, validar o banco e receber na hora imediatamente! Clique em <strong>Copiar Referência</strong> para começar.</p>
           </div>
         </div>
@@ -679,8 +679,39 @@
     }
 
     function applyPageData() {
-      setText("brandLogoText", PAGE_DATA.branch.code);
-      setText("assistantBrand", PAGE_DATA.branch.code);
+      const branchCode = String(PAGE_DATA.branch?.code || "XLO").trim().toUpperCase();
+
+      document.title = `Minha Conta - ${branchCode} | Painel de Controle`;
+
+      setText("brandLogoText", branchCode);
+      setText("assistantBrand", branchCode);
+
+      document.querySelectorAll('[data-branch-code]').forEach(el => {
+        el.textContent = branchCode;
+      });
+
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            const parent = node.parentElement;
+            if (!parent) return NodeFilter.FILTER_REJECT;
+            if (["SCRIPT","STYLE","NOSCRIPT"].includes(parent.tagName)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            return /\bXLO\b/.test(node.nodeValue || "")
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_REJECT;
+          }
+        }
+      );
+
+      const brandTextNodes = [];
+      while (walker.nextNode()) brandTextNodes.push(walker.currentNode);
+      brandTextNodes.forEach(node => {
+        node.nodeValue = node.nodeValue.replace(/\bXLO\b/g, branchCode);
+      });
 
       document.querySelectorAll('[data-seller-name]').forEach(el => el.textContent = PAGE_DATA.seller.name);
       document.querySelectorAll('[data-seller-initial]').forEach(el => el.textContent = PAGE_DATA.seller.initial);
@@ -708,9 +739,28 @@
       const codeInput = document.getElementById('copyCodeInput');
       if (codeInput) codeInput.value = PAGE_DATA.sale.referenceCode;
 
-      document.querySelectorAll('[data-assistant-name]').forEach(el => el.textContent = PAGE_DATA.assistant.name);
+      document.querySelectorAll('[data-assistant-name]').forEach(el => {
+        el.textContent = PAGE_DATA.assistant.name;
+      });
+
       setText("assistantWelcome", resolveVars(PAGE_DATA.assistant.welcome));
+
+      const assistantHeaderTitle = document.getElementById("assistantHeaderTitle");
+      if (assistantHeaderTitle) {
+        assistantHeaderTitle.innerHTML =
+          `<span data-assistant-name>${PAGE_DATA.assistant.name}</span> - Assistente <span data-branch-code>${branchCode}</span>`;
+      }
+
+      document.querySelectorAll('[data-assistant-name]').forEach(el => {
+        el.textContent = PAGE_DATA.assistant.name;
+      });
+      document.querySelectorAll('[data-branch-code]').forEach(el => {
+        el.textContent = branchCode;
+      });
     }
+
+    window.PAGE_DATA = PAGE_DATA;
+    window.applyPageData = applyPageData;
 
     let appState = {
       isReleased: false,
