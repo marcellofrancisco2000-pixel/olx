@@ -1,20 +1,148 @@
+// netlify/functions/save-page.mjs
+// Abravanel Admin — save-page com diagnóstico seguro.
+// Nunca retorna o conteúdo do GITHUB_TOKEN.
+
+const API_VERSION = "2022-11-28";
+
 export default async (req) => {
+  const requestId = crypto.randomUUID();
+
   try {
+    // ============================================================
+    // GET = HEALTH CHECK / SUPER DEBUG
+    // ============================================================
+    if (req.method === "GET") {
+      const token = process.env.GITHUB_TOKEN || "";
+      const owner = process.env.GITHUB_OWNER || "";
+      const repo = process.env.GITHUB_REPO || "";
+      const branch = process.env.GITHUB_BRANCH || "main";
+
+      const missing = [];
+
+      if (!token) {
+        missing.push("GITHUB_TOKEN");
+      }
+
+      if (!owner) {
+        missing.push("GITHUB_OWNER");
+      }
+
+      if (!repo) {
+        missing.push("GITHUB_REPO");
+      }
+
+      const health = {
+        ok: missing.length === 0,
+
+        function: "save-page",
+
+        requestId,
+
+        time: new Date().toISOString(),
+
+        env: {
+          ok: missing.length === 0,
+
+          missing,
+
+          message: missing.length
+            ? `Variáveis ausentes: ${missing.join(", ")}`
+            : "Variáveis necessárias encontradas.",
+
+          tokenPresent: Boolean(token),
+
+          owner: owner || null,
+
+          repo: repo || null,
+
+          branch
+        },
+
+        github: {
+          reachable: false,
+          status: null,
+          message: "Teste não executado"
+        }
+      };
+
+      if (missing.length === 0) {
+        try {
+          const test = await fetch(
+            `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+            {
+              headers: githubHeaders(token)
+            }
+          );
+
+          health.github.status = test.status;
+
+          const body = await safeJson(test);
+
+          if (test.ok) {
+            health.github.reachable = true;
+
+            health.github.message =
+              `Repositório acessível: ${
+                body.full_name ||
+                owner + "/" + repo
+              }`;
+
+            health.github.defaultBranch =
+              body.default_branch || null;
+
+            health.github.private =
+              body.private ?? null;
+          } else {
+            health.github.reachable = false;
+
+            health.github.message =
+              body.message ||
+              `GitHub HTTP ${test.status}`;
+          }
+        } catch (error) {
+          health.github.reachable = false;
+
+          health.github.message =
+            error.message;
+        }
+      }
+
+      health.ok =
+        health.env.ok &&
+        health.github.reachable;
+
+      return response(
+        health,
+        health.ok ? 200 : 500
+      );
+    }
+
+    // ============================================================
+    // POST = CRIAR / ATUALIZAR JSON DA PÁGINA
+    // ============================================================
+
     if (req.method !== "POST") {
-      return json(
+      return response(
         {
           ok: false,
-          error: "Método não permitido"
+
+          requestId,
+
+          stage: "method",
+
+          error:
+            "Método não permitido"
         },
         405
       );
     }
 
-    const body = await req.json();
+    const body =
+      await req.json();
 
-    // ============================
-    // VALIDAÇÃO DO ID
-    // ============================
+    // ============================================================
+    // ID DA PÁGINA
+    // ============================================================
 
     const pageId = String(
       body?.sale?.pageId || ""
@@ -23,73 +151,170 @@ export default async (req) => {
       .toUpperCase();
 
     if (!pageId) {
-      return json(
+      return response(
         {
           ok: false,
-          error: "ID da página não informado"
+
+          requestId,
+
+          stage: "validation",
+
+          error:
+            "ID da página não informado"
         },
         400
       );
     }
 
-    if (!/^[A-Z0-9_-]{4,32}$/.test(pageId)) {
-      return json(
+    if (
+      !/^[A-Z0-9_-]{4,32}$/.test(
+        pageId
+      )
+    ) {
+      return response(
         {
           ok: false,
-          error: "Formato de ID inválido"
+
+          requestId,
+
+          stage: "validation",
+
+          error:
+            "Formato de ID inválido",
+
+          pageId
         },
         400
       );
     }
 
-    // ============================
+    // ============================================================
     // VARIÁVEIS DO NETLIFY
-    // ============================
+    // ============================================================
 
     const token =
-      process.env.GITHUB_TOKEN;
+      process.env.GITHUB_TOKEN || "";
 
     const owner =
-      process.env.GITHUB_OWNER;
+      process.env.GITHUB_OWNER || "";
 
     const repo =
-      process.env.GITHUB_REPO;
+      process.env.GITHUB_REPO || "";
 
     const branch =
       process.env.GITHUB_BRANCH ||
       "main";
 
+    const missing = [];
+
     if (!token) {
-      throw new Error(
-        "GITHUB_TOKEN não configurado"
+      missing.push(
+        "GITHUB_TOKEN"
       );
     }
 
     if (!owner) {
-      throw new Error(
-        "GITHUB_OWNER não configurado"
+      missing.push(
+        "GITHUB_OWNER"
       );
     }
 
     if (!repo) {
-      throw new Error(
-        "GITHUB_REPO não configurado"
+      missing.push(
+        "GITHUB_REPO"
       );
     }
 
-    // ============================
-    // CAMINHO DO ARQUIVO
-    // ============================
+    if (missing.length) {
+      return response(
+        {
+          ok: false,
+
+          requestId,
+
+          stage:
+            "environment",
+
+          error:
+            `Variáveis ausentes: ${missing.join(", ")}`,
+
+          env: {
+            tokenPresent:
+              Boolean(token),
+
+            owner:
+              owner || null,
+
+            repo:
+              repo || null,
+
+            branch
+          }
+        },
+        500
+      );
+    }
+
+    // ============================================================
+    // CAMINHO DO JSON
+    // ============================================================
 
     const filePath =
       `data/pages/${pageId}.json`;
 
     const githubApi =
-      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
-    // ============================
-    // VERIFICAR SE JÁ EXISTE
-    // ============================
+    // ============================================================
+    // TESTAR O REPOSITÓRIO
+    // ============================================================
+
+    const repoTest =
+      await fetch(
+        `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+        {
+          headers:
+            githubHeaders(token)
+        }
+      );
+
+    if (!repoTest.ok) {
+      const repoError =
+        await safeJson(
+          repoTest
+        );
+
+      return response(
+        {
+          ok: false,
+
+          requestId,
+
+          stage:
+            "github-repository",
+
+          error:
+            repoError.message ||
+            `GitHub HTTP ${repoTest.status}`,
+
+          githubStatus:
+            repoTest.status,
+
+          owner,
+
+          repo,
+
+          branch
+        },
+        repoTest.status === 404
+          ? 502
+          : repoTest.status
+      );
+    }
+
+    // ============================================================
+    // VERIFICAR SE O ARQUIVO JÁ EXISTE
+    // ============================================================
 
     let sha = null;
 
@@ -99,45 +324,57 @@ export default async (req) => {
         {
           method: "GET",
 
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-
-            Accept:
-              "application/vnd.github+json",
-
-            "X-GitHub-Api-Version":
-              "2022-11-28"
-          }
+          headers:
+            githubHeaders(token)
         }
       );
 
     if (checkResponse.ok) {
       const existingFile =
-        await checkResponse.json();
+        await safeJson(
+          checkResponse
+        );
 
       sha =
-        existingFile.sha;
+        existingFile.sha ||
+        null;
     }
 
-    // 404 = arquivo novo
     else if (
       checkResponse.status !== 404
     ) {
-      const erroGithub =
-        await checkResponse
-          .json()
-          .catch(() => ({}));
+      const checkError =
+        await safeJson(
+          checkResponse
+        );
 
-      throw new Error(
-        erroGithub.message ||
-        `Erro GitHub ${checkResponse.status}`
+      return response(
+        {
+          ok: false,
+
+          requestId,
+
+          stage:
+            "github-check-file",
+
+          error:
+            checkError.message ||
+            `Erro ao verificar arquivo: HTTP ${checkResponse.status}`,
+
+          githubStatus:
+            checkResponse.status,
+
+          filePath,
+
+          branch
+        },
+        checkResponse.status
       );
     }
 
-    // ============================
-    // PREPARAR JSON
-    // ============================
+    // ============================================================
+    // PREPARAR OS DADOS
+    // ============================================================
 
     const pageData = {
       ...body,
@@ -146,37 +383,41 @@ export default async (req) => {
         ...(body.meta || {}),
 
         schema:
-          body.meta?.schema || 1,
+          body.meta?.schema ||
+          1,
 
         updatedAt:
-          new Date().toISOString(),
+          new Date()
+            .toISOString(),
 
         published:
           true
       }
     };
 
-    const conteudoJson =
+    // Remove flag interna de debug
+    delete pageData.__debug;
+
+    const jsonText =
       JSON.stringify(
         pageData,
         null,
         2
       );
 
-    // GitHub Contents API exige Base64
     const contentBase64 =
       Buffer
         .from(
-          conteudoJson,
+          jsonText,
           "utf8"
         )
         .toString(
           "base64"
         );
 
-    // ============================
+    // ============================================================
     // PAYLOAD PARA GITHUB
-    // ============================
+    // ============================================================
 
     const payload = {
       message:
@@ -187,20 +428,19 @@ export default async (req) => {
       content:
         contentBase64,
 
-      branch:
-        branch
+      branch
     };
 
     // Para atualizar arquivo existente,
-    // o GitHub exige o SHA atual.
+    // o GitHub exige SHA.
     if (sha) {
       payload.sha =
         sha;
     }
 
-    // ============================
-    // CRIAR / ATUALIZAR
-    // ============================
+    // ============================================================
+    // CRIAR / ATUALIZAR ARQUIVO
+    // ============================================================
 
     const saveResponse =
       await fetch(
@@ -209,14 +449,9 @@ export default async (req) => {
           method: "PUT",
 
           headers: {
-            Authorization:
-              `Bearer ${token}`,
-
-            Accept:
-              "application/vnd.github+json",
-
-            "X-GitHub-Api-Version":
-              "2022-11-28",
+            ...githubHeaders(
+              token
+            ),
 
             "Content-Type":
               "application/json"
@@ -230,58 +465,81 @@ export default async (req) => {
       );
 
     const saveResult =
-      await saveResponse
-        .json()
-        .catch(() => ({}));
-
-    if (!saveResponse.ok) {
-      console.error(
-        "ERRO GITHUB:",
-        saveResult
+      await safeJson(
+        saveResponse
       );
 
-      return json(
+    // ============================================================
+    // ERRO DO GITHUB
+    // ============================================================
+
+    if (!saveResponse.ok) {
+      return response(
         {
           ok: false,
+
+          requestId,
+
+          stage:
+            "github-save",
 
           error:
             saveResult.message ||
             "GitHub recusou a alteração",
 
           githubStatus:
-            saveResponse.status
+            saveResponse.status,
+
+          documentation_url:
+            saveResult.documentation_url ||
+            null,
+
+          filePath,
+
+          branch,
+
+          updatingExistingFile:
+            Boolean(sha)
         },
         saveResponse.status
       );
     }
 
-    // ============================
+    // ============================================================
     // SUCESSO
-    // ============================
+    // ============================================================
 
-    return json(
+    return response(
       {
         ok: true,
+
+        requestId,
+
+        stage:
+          "complete",
 
         created:
           !sha,
 
         updated:
-          !!sha,
+          Boolean(sha),
 
-        pageId:
-          pageId,
+        pageId,
 
         path:
           filePath,
 
-        branch:
-          branch,
+        owner,
+
+        repo,
+
+        branch,
 
         commitSha:
           saveResult
             ?.commit
-            ?.sha || null,
+            ?.sha ||
+          null,
 
         pageUrl:
           `/p/${pageId}/`
@@ -290,19 +548,28 @@ export default async (req) => {
     );
 
   } catch (error) {
-
     console.error(
-      "SAVE-PAGE ERROR:",
+      "SAVE-PAGE ERROR",
+      requestId,
       error
     );
 
-    return json(
+    return response(
       {
         ok: false,
 
+        requestId,
+
+        stage:
+          "unhandled",
+
         error:
           error?.message ||
-          "Erro interno da função"
+          "Erro interno da função",
+
+        type:
+          error?.name ||
+          "Error"
       },
       500
     );
@@ -310,17 +577,67 @@ export default async (req) => {
 };
 
 
-// ============================
-// RESPOSTA JSON PADRÃO
-// ============================
+// ============================================================
+// HEADERS DO GITHUB
+// ============================================================
 
-function json(
+function githubHeaders(
+  token
+) {
+  return {
+    Authorization:
+      `Bearer ${token}`,
+
+    Accept:
+      "application/vnd.github+json",
+
+    "X-GitHub-Api-Version":
+      API_VERSION,
+
+    "User-Agent":
+      "Abravanel-Admin-Netlify-Function"
+  };
+}
+
+
+// ============================================================
+// LER RESPOSTA DO GITHUB
+// ============================================================
+
+async function safeJson(
+  res
+) {
+  const text =
+    await res.text();
+
+  try {
+    return JSON.parse(
+      text
+    );
+  } catch {
+    return {
+      message:
+        text ||
+        `Resposta vazia (HTTP ${res.status})`
+    };
+  }
+}
+
+
+// ============================================================
+// RESPOSTA JSON
+// ============================================================
+
+function response(
   data,
   status = 200
 ) {
-
   return new Response(
-    JSON.stringify(data),
+    JSON.stringify(
+      data,
+      null,
+      2
+    ),
     {
       status,
 
