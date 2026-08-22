@@ -195,7 +195,7 @@ const branch = "main";
     // VARIÁVEIS DO NETLIFY
     // ============================================================
 
-    const token = "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";
+    const token = process.env.GITHUB_TOKEN || "";
 
     const owner =
       process.env.GITHUB_OWNER || "";
