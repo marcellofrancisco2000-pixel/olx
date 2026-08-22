@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Abravanel // Admin System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{
+  --bg:#070b10;--panel:#0d131b;--panel2:#101923;--line:#223142;
+  --text:#eef7ff;--muted:#8da2b8;--green:#00e5a8;--blue:#00a9ff;
+  --amber:#ffbf47;--red:#ff5f6d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,
+  BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+  radial-gradient(circle at 8% 0%,rgba(0,229,168,.09),transparent 28%),
+  radial-gradient(circle at 100% 15%,rgba(0,169,255,.08),transparent 28%),var(--bg)
+}
+.glass{background:rgba(13,19,27,.94);border:1px solid var(--line);box-shadow:0 14px 45px rgba(0,0,0,.26)}
+.field{background:#080e14;border:1px solid #263649;color:#f4f8fc;transition:.18s}
+.field:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,229,168,.08)}
+.label{font-size:11px;font-weight:900;letter-spacing:.08em;color:#8fa3b8;text-transform:uppercase}
+.nav-btn{border:1px solid transparent;color:#b8c5d2}
+.nav-btn:hover{background:#111a24;color:white}
+.nav-btn.active{background:linear-gradient(90deg,rgba(0,229,168,.14),rgba(0,169,255,.07));border-color:rgba(0,229,168,.32);color:white}
+.section{display:none}.section.active{display:block}
+.pill{background:#091019;border:1px solid #223245}
+.terminal{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.brand-glow{text-shadow:0 0 20px rgba(0,229,168,.45)}
+.preview-shell{background:#05080c;border:1px solid #263646;border-radius:18px;overflow:hidden}
+.preview-stage{margin:auto;transition:width .25s ease;height:720px;background:#fff}
+.preview-stage.desktop{width:100%}.preview-stage.tablet{width:768px;max-width:100%}.preview-stage.mobile{width:390px;max-width:100%}
+.preview-stage iframe{width:100%;height:100%;border:0;background:white}
+.status-dot{width:8px;height:8px;border-radius:999px;display:inline-block}
+.progress{height:8px;background:#162231;border-radius:999px;overflow:hidden}
+.progress>div{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .25s}
+.toast{transform:translateY(30px);opacity:0;pointer-events:none;transition:.25s}
+.toast.show{transform:none;opacity:1}
+.modal-backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(4px)}
+kbd{background:#101923;border:1px solid #2a3a4d;border-bottom-width:2px;border-radius:6px;padding:2px 6px;font-size:11px;color:#c8d7e7}
+.table-row:hover{background:rgba(255,255,255,.018)}
+code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius:6px;padding:1px 5px}
+</style>
+</head>
+<body>
+<div class="min-h-screen grid grid-cols-1 xl:grid-cols-[285px_1fr]">
+
+  <aside class="glass border-y-0 border-l-0 xl:min-h-screen xl:sticky xl:top-0 z-40">
+    <div class="p-5 border-b border-slate-800">
+      <div class="text-[11px] uppercase tracking-[.38em] text-emerald-400 font-black">ABRAVANEL</div>
+      <div class="text-2xl font-black mt-1 brand-glow">ADMIN SYSTEM</div>
+      <div class="text-xs text-slate-400 mt-1">Co-criador / Administração</div>
+    </div>
+
+    <div class="p-3">
+      <button class="nav-btn active w-full text-left px-4 py-3 rounded-xl" data-section="dashboard"><i class="fa-solid fa-gauge-high w-6"></i>Dashboard</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="branch"><i class="fa-solid fa-code-branch w-6"></i>Filial</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="seller"><i class="fa-solid fa-user-shield w-6"></i>Vendedor</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="buyer"><i class="fa-solid fa-user w-6"></i>Comprador</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="product"><i class="fa-solid fa-box-open w-6"></i>Produto</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="sale"><i class="fa-solid fa-receipt w-6"></i>Venda</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="images"><i class="fa-solid fa-images w-6"></i>Imagens</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="audio"><i class="fa-solid fa-volume-high w-6"></i>Áudio / Assistente</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="preview"><i class="fa-solid fa-desktop w-6"></i>Preview real</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="diagnostics"><i class="fa-solid fa-stethoscope w-6"></i>Diagnóstico</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="pages"><i class="fa-solid fa-layer-group w-6"></i>Minhas páginas</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="history"><i class="fa-solid fa-clock-rotate-left w-6"></i>Histórico</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="backup"><i class="fa-solid fa-shield-halved w-6"></i>Backup / Recuperação</button>
+    </div>
+
+    <div class="p-4">
+      <div class="pill rounded-xl p-3 text-xs space-y-2">
+        <div class="flex justify-between"><span class="text-slate-400">Template</span><b class="text-emerald-400">V1</b></div>
+        <div class="flex justify-between"><span class="text-slate-400">Estado</span><b id="sidebarState" class="text-amber-400">Rascunho</b></div>
+        <div class="flex justify-between"><span class="text-slate-400">Autosave</span><b id="autosaveState" class="text-sky-400">Ativo</b></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="min-w-0">
+    <header class="sticky top-0 z-30 bg-[#070b10]/90 backdrop-blur border-b border-slate-800">
+      <div class="px-4 md:px-7 py-3 flex flex-wrap items-center gap-3 justify-between">
+        <div class="flex items-center gap-4 min-w-0">
+          <div>
+            <div class="text-[10px] text-slate-500 uppercase tracking-[.2em]">Página atual</div>
+            <div class="font-black truncate"><span id="topPageName">Venda Osmar - Cômoda</span></div>
+          </div>
+          <div class="hidden md:block h-8 w-px bg-slate-800"></div>
+          <div class="hidden md:flex items-center gap-2 text-xs">
+            <span class="status-dot bg-emerald-400"></span>
+            <span id="topSaveStatus" class="text-slate-300">Salvo</span>
+          </div>
+          <div class="hidden lg:flex items-center gap-2 text-xs">
+            <span class="text-slate-500">Saúde</span>
+            <b id="topHealth" class="text-emerald-400">100%</b>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button onclick="undoLast()" class="px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-sm" title="Desfazer">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <button onclick="saveDraft(true)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm">
+            <i class="fa-solid fa-floppy-disk mr-2"></i>Salvar
+          </button>
+          <button onclick="openSection('preview')" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 font-bold text-sm">
+            <i class="fa-solid fa-eye mr-2"></i>Preview
+          </button>
+          <button onclick="publishPage()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm">
+            <i class="fa-solid fa-rocket mr-2"></i>Publicar
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-7">
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="section active">
+        <div class="grid sm:grid-cols-2 2xl:grid-cols-5 gap-4">
+          <div class="glass rounded-2xl p-5"><div class="text-xs text-slate-400 uppercase">Filial</div><div id="dashBranch" class="text-2xl font-black mt-2">XLO</div></div>
+          <div class="glass rounded-2xl p-5"><div class="text-xs text-slate-400 uppercase">Vendedor</div><div id="dashSeller" class="text-lg font-black mt-2 truncate">Patricia Medina</div></div>
+          <div class="glass rounded-2xl p-5"><div class="text-xs text-slate-400 uppercase">Produto</div><div id="dashProduct" class="text-lg font-black mt-2 truncate">Cômoda</div></div>
+          <div class="glass rounded-2xl p-5"><div class="text-xs text-slate-400 uppercase">Página</div><div id="dashId" class="terminal text-lg font-black mt-2 text-emerald-400">A7K29P</div></div>
+          <div class="glass rounded-2xl p-5">
+            <div class="text-xs text-slate-400 uppercase">Saúde</div>
+            <div class="flex items-end gap-2 mt-2"><div id="healthNumber" class="text-2xl font-black">100%</div><div id="healthLabel" class="text-xs text-emerald-400 mb-1">Pronto</div></div>
+            <div class="progress mt-3"><div id="healthBar" style="width:100%"></div></div>
+          </div>
+        </div>
+
+        <div class="grid xl:grid-cols-[1fr_440px] gap-5 mt-5">
+          <div class="glass rounded-2xl p-6">
+            <div class="flex justify-between items-center gap-3">
+              <div>
+                <h2 class="text-xl font-black">Fluxo do projeto</h2>
+                <p class="text-sm text-slate-400 mt-1">Complete os dados e só publique quando o diagnóstico estiver saudável.</p>
+              </div>
+              <button onclick="openSection('diagnostics')" class="px-4 py-2 rounded-xl bg-slate-800 text-sm font-bold">Ver diagnóstico</button>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+              <button onclick="openSection('branch')" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-emerald-400">01</b><div class="font-bold mt-1">Filial</div></button>
+              <button onclick="openSection('seller')" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-emerald-400">02</b><div class="font-bold mt-1">Vendedor</div></button>
+              <button onclick="openSection('buyer')" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-emerald-400">03</b><div class="font-bold mt-1">Comprador</div></button>
+              <button onclick="openSection('product')" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-emerald-400">04</b><div class="font-bold mt-1">Produto</div></button>
+              <button onclick="openSection('images')" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-sky-400">05</b><div class="font-bold mt-1">Imagens</div></button>
+              <button onclick="openSection('audio')" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-sky-400">06</b><div class="font-bold mt-1">Áudio</div></button>
+              <button onclick="openSection('preview')" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-sky-400">07</b><div class="font-bold mt-1">Preview</div></button>
+              <button onclick="publishPage()" class="pill rounded-xl p-4 text-left hover:border-emerald-500"><b class="text-amber-400">08</b><div class="font-bold mt-1">Publicar</div></button>
+            </div>
+          </div>
+
+          <div class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-black">Resumo do diagnóstico</h2>
+              <span id="diagMiniBadge" class="text-xs font-black px-2 py-1 rounded bg-emerald-500/10 text-emerald-400">OK</span>
+            </div>
+            <div id="diagnosticMini" class="mt-4 space-y-2 text-sm"></div>
+          </div>
+        </div>
+
+        <div class="glass rounded-2xl p-6 mt-5">
+          <div class="flex flex-wrap gap-3 justify-between items-center">
+            <div>
+              <h2 class="text-lg font-black">Atalhos</h2>
+              <p class="text-xs text-slate-400 mt-1"><kbd>Ctrl</kbd> + <kbd>S</kbd> salvar · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> preview</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="createSnapshot('Snapshot manual')" class="px-4 py-2 rounded-xl bg-slate-800 font-bold text-sm">Criar snapshot</button>
+              <button onclick="exportProject()" class="px-4 py-2 rounded-xl bg-slate-800 font-bold text-sm">Exportar JSON</button>
+              <label class="px-4 py-2 rounded-xl bg-slate-800 font-bold text-sm cursor-pointer">
+                Importar JSON<input id="importFile" type="file" accept=".json,application/json" class="hidden">
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FILIAL -->
+      <section id="branch" class="section">
+        <div class="glass rounded-2xl p-6 max-w-4xl">
+          <h2 class="text-xl font-black">Filial / Identidade</h2>
+          <p class="text-sm text-slate-400 mt-1">Uma única sigla alimentará os pontos configuráveis da página.</p>
+          <div class="grid md:grid-cols-[1fr_auto] gap-3 mt-5">
+            <div><label class="label">Sigla da filial</label><input id="branchCode" maxlength="5" class="field w-full mt-2 rounded-xl px-4 py-3 uppercase font-black tracking-widest" value="XLO"></div>
+            <button onclick="randomBranch()" class="self-end px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold"><i class="fa-solid fa-shuffle mr-2"></i>Gerar</button>
+          </div>
+          <div class="mt-4 text-xs text-slate-500">Exemplos: XLO, ABC, XDE. O gerador cria letras aleatórias e evita repetir siglas já usadas localmente.</div>
+        </div>
+      </section>
+
+      <!-- VENDEDOR -->
+      <section id="seller" class="section">
+        <div class="glass rounded-2xl p-6 max-w-5xl">
+          <div class="flex flex-wrap gap-3 justify-between items-center">
+            <div><h2 class="text-xl font-black">Perfil do vendedor</h2><p class="text-sm text-slate-400 mt-1">Salve perfis para reutilizar em novas páginas.</p></div>
+            <div class="flex gap-2">
+              <select id="sellerProfileSelect" class="field rounded-xl px-3 py-2 text-sm"><option value="">Selecionar perfil...</option></select>
+              <button onclick="saveSellerProfile()" class="px-4 py-2 rounded-xl bg-slate-800 font-bold text-sm">Salvar perfil</button>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4 mt-5">
+            <div><label class="label">Nome completo</label><input id="sellerName" class="field w-full mt-2 rounded-xl px-4 py-3" value="Patricia Medina"></div>
+            <div><label class="label">Primeiro nome</label><input id="sellerFirstName" class="field w-full mt-2 rounded-xl px-4 py-3" value="Patricia"></div>
+            <div><label class="label">Inicial</label><input id="sellerInitial" maxlength="2" class="field w-full mt-2 rounded-xl px-4 py-3" value="P"></div>
+            <div><label class="label">Status</label><input id="sellerStatus" class="field w-full mt-2 rounded-xl px-4 py-3" value="Vendedor Verificado"></div>
+            <div><label class="label">Avatar / URL</label><input id="sellerAvatar" class="field w-full mt-2 rounded-xl px-4 py-3" placeholder="https://..."></div>
+            <div><label class="label">ID interno</label><input id="sellerId" class="field w-full mt-2 rounded-xl px-4 py-3 terminal" value="seller_001"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPRADOR -->
+      <section id="buyer" class="section">
+        <div class="glass rounded-2xl p-6 max-w-5xl">
+          <h2 class="text-xl font-black">Comprador</h2>
+          <div class="grid md:grid-cols-2 gap-4 mt-5">
+            <div><label class="label">Nome completo</label><input id="buyerName" class="field w-full mt-2 rounded-xl px-4 py-3" value="Osmar Britz"></div>
+            <div><label class="label">Primeiro nome</label><input id="buyerFirstName" class="field w-full mt-2 rounded-xl px-4 py-3" value="Osmar"></div>
+            <div><label class="label">Cidade</label><input id="buyerCity" class="field w-full mt-2 rounded-xl px-4 py-3" value="São Luiz Gonzaga"></div>
+            <div><label class="label">Estado</label><input id="buyerState" maxlength="2" class="field w-full mt-2 rounded-xl px-4 py-3 uppercase" value="RS"></div>
+            <div><label class="label">CEP</label><input id="buyerCep" class="field w-full mt-2 rounded-xl px-4 py-3" placeholder="Opcional"></div>
+            <div><label class="label">Região</label><input id="buyerRegion" class="field w-full mt-2 rounded-xl px-4 py-3" placeholder="Opcional"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUTO -->
+      <section id="product" class="section">
+        <div class="glass rounded-2xl p-6 max-w-5xl">
+          <h2 class="text-xl font-black">Produto</h2>
+          <div class="grid md:grid-cols-2 gap-4 mt-5">
+            <div><label class="label">Nome do produto</label><input id="productTitle" class="field w-full mt-2 rounded-xl px-4 py-3" value="Cômoda"></div>
+            <div><label class="label">Valor</label><input id="productPrice" type="number" min="0" step="0.01" class="field w-full mt-2 rounded-xl px-4 py-3" value="260"></div>
+            <div><label class="label">Status</label><input id="productStatus" class="field w-full mt-2 rounded-xl px-4 py-3" value="VENDIDO"></div>
+            <div><label class="label">Categoria</label><input id="productCategory" class="field w-full mt-2 rounded-xl px-4 py-3" placeholder="Opcional"></div>
+            <div class="md:col-span-2"><label class="label">Descrição</label><textarea id="productDescription" rows="5" class="field w-full mt-2 rounded-xl px-4 py-3">Cômoda</textarea></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VENDA -->
+      <section id="sale" class="section">
+        <div class="glass rounded-2xl p-6 max-w-5xl">
+          <h2 class="text-xl font-black">Dados da venda</h2>
+          <div class="grid md:grid-cols-2 gap-4 mt-5">
+            <div>
+              <label class="label">ID da página</label>
+              <div class="flex gap-2 mt-2"><input id="pageId" class="field flex-1 rounded-xl px-4 py-3 terminal uppercase" value="A7K29P"><button onclick="generatePageId()" class="px-4 rounded-xl bg-slate-800"><i class="fa-solid fa-rotate"></i></button></div>
+            </div>
+            <div><label class="label">Nome interno</label><input id="internalName" class="field w-full mt-2 rounded-xl px-4 py-3" value="Venda Osmar - Cômoda"></div>
+            <div><label class="label">ID do pedido</label><input id="orderId" class="field w-full mt-2 rounded-xl px-4 py-3 terminal" value="992014883"></div>
+            <div><label class="label">ID da transação</label><input id="transactionId" class="field w-full mt-2 rounded-xl px-4 py-3 terminal" value="TX-992014883"></div>
+            <div><label class="label">Status</label><select id="saleStatus" class="field w-full mt-2 rounded-xl px-4 py-3"><option>Rascunho</option><option>Pendente</option><option>Processando</option><option>Concluído</option><option>Cancelado</option></select></div>
+            <div><label class="label">Data</label><input id="saleDate" type="date" class="field w-full mt-2 rounded-xl px-4 py-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- IMAGENS -->
+      <section id="images" class="section">
+        <div class="glass rounded-2xl p-6 max-w-5xl">
+          <h2 class="text-xl font-black">Imagens</h2>
+          <p class="text-sm text-slate-400 mt-1">Nesta etapa, URLs são salvas. Upload físico entra junto com o servidor.</p>
+          <div class="mt-5">
+            <label class="label">Foto principal</label>
+            <input id="productImage" class="field w-full mt-2 rounded-xl px-4 py-3" value="https://img.olx.com.br/images/85/853630792833876.webp">
+            <div class="grid md:grid-cols-[280px_1fr] gap-5 mt-5">
+              <div class="pill rounded-2xl p-4"><img id="imagePreview" class="w-full aspect-square object-cover rounded-xl bg-black" alt="Preview"></div>
+              <div class="pill rounded-2xl p-5">
+                <div class="font-black">Teste da imagem</div>
+                <div id="imageCheck" class="text-sm text-slate-400 mt-2">Aguardando verificação...</div>
+                <button onclick="checkImage(true)" class="mt-4 px-4 py-2 rounded-xl bg-slate-800 font-bold text-sm">Testar agora</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AUDIO -->
+      <section id="audio" class="section">
+        <div class="glass rounded-2xl p-6 max-w-5xl">
+          <h2 class="text-xl font-black">Áudio / Assistente</h2>
+          <p class="text-sm text-slate-400 mt-1">Variáveis: <code class="var">{{buyer.firstName}}</code> <code class="var">{{seller.name}}</code> <code class="var">{{product.title}}</code> <code class="var">{{branch.code}}</code>.</p>
+          <div class="grid md:grid-cols-2 gap-4 mt-5">
+            <div><label class="label">Nome do assistente</label><input id="assistantName" class="field w-full mt-2 rounded-xl px-4 py-3" value="Ana"></div>
+            <div><label class="label">Voz</label><select id="voiceEnabled" class="field w-full mt-2 rounded-xl px-4 py-3"><option value="true">Ativada</option><option value="false">Desativada</option></select></div>
+            <div class="md:col-span-2"><label class="label">Mensagem de abertura</label><textarea id="audioWelcome" rows="4" class="field w-full mt-2 rounded-xl px-4 py-3">Olá, {{buyer.firstName}}! Sou a {{assistant.name}} da {{branch.code}}.</textarea></div>
+            <div class="md:col-span-2"><label class="label">Mensagem 2</label><textarea id="audioInstruction" rows="4" class="field w-full mt-2 rounded-xl px-4 py-3">Esta página mostra os detalhes da venda de {{product.title}}.</textarea></div>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <button onclick="testVoice()" class="px-5 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 font-black"><i class="fa-solid fa-volume-high mr-2"></i>Ouvir teste</button>
+            <button onclick="validateVariables(true)" class="px-5 py-3 rounded-xl bg-slate-800 font-black">Validar variáveis</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PREVIEW -->
+      <section id="preview" class="section">
+        <div class="glass rounded-2xl p-5">
+          <div class="flex flex-wrap gap-3 justify-between items-center">
+            <div>
+              <h2 class="text-xl font-black">Preview real do Template V1</h2>
+              <p class="text-sm text-slate-400 mt-1">O ADM tenta carregar <span class="terminal">template-master-v1.html</span> e aplicar os dados atuais.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="setPreviewMode('desktop')" class="px-3 py-2 rounded-xl bg-slate-800 text-sm"><i class="fa-solid fa-desktop mr-1"></i>Desktop</button>
+              <button onclick="setPreviewMode('tablet')" class="px-3 py-2 rounded-xl bg-slate-800 text-sm"><i class="fa-solid fa-tablet-screen-button mr-1"></i>Tablet</button>
+              <button onclick="setPreviewMode('mobile')" class="px-3 py-2 rounded-xl bg-slate-800 text-sm"><i class="fa-solid fa-mobile-screen mr-1"></i>Celular</button>
+              <button onclick="refreshPreview()" class="px-3 py-2 rounded-xl bg-sky-600 text-sm font-bold"><i class="fa-solid fa-rotate mr-1"></i>Atualizar</button>
+            </div>
+          </div>
+          <div id="previewStatus" class="mt-4 text-xs text-slate-400"></div>
+          <div class="preview-shell mt-4 p-3 overflow-auto">
+            <div id="previewStage" class="preview-stage desktop">
+              <iframe id="sitePreview" src="template-master-v1.html" title="Preview"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DIAGNOSTICS -->
+      <section id="diagnostics" class="section">
+        <div class="grid xl:grid-cols-[1fr_380px] gap-5">
+          <div class="glass rounded-2xl p-6">
+            <div class="flex justify-between items-center">
+              <div><h2 class="text-xl font-black">Centro de Diagnóstico</h2><p class="text-sm text-slate-400 mt-1">Valida dados, consistência e o template carregado.</p></div>
+              <button onclick="runDiagnostics(true)" class="px-4 py-2 rounded-xl bg-sky-600 font-bold text-sm">Executar novamente</button>
+            </div>
+            <div id="diagnosticFull" class="mt-5 space-y-2"></div>
+          </div>
+          <div class="glass rounded-2xl p-6">
+            <div class="text-xs text-slate-400 uppercase">Saúde da página</div>
+            <div id="diagHealthBig" class="text-5xl font-black mt-2">100%</div>
+            <div class="progress mt-4"><div id="diagHealthBar" style="width:100%"></div></div>
+            <div id="diagSummaryText" class="text-sm text-slate-400 mt-4"></div>
+            <button onclick="fixSimpleIssues()" class="w-full mt-5 px-4 py-3 rounded-xl bg-emerald-500 text-black font-black">Corrigir problemas simples</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGES -->
+      <section id="pages" class="section">
+        <div class="glass rounded-2xl overflow-hidden">
+          <div class="p-5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div><h2 class="text-xl font-black">Minhas páginas</h2><p class="text-sm text-slate-400">Persistência local nesta etapa.</p></div>
+            <button onclick="newPage()" class="px-4 py-2.5 rounded-xl bg-emerald-500 text-black font-black">+ Nova página</button>
+          </div>
+          <div class="overflow-auto">
+            <table class="w-full min-w-[1050px] text-sm">
+              <thead class="bg-black/20 text-slate-400 text-xs uppercase">
+                <tr><th class="p-4 text-left">Nome</th><th class="p-4 text-left">Filial</th><th class="p-4 text-left">Vendedor</th><th class="p-4 text-left">Produto</th><th class="p-4 text-left">Comprador</th><th class="p-4 text-left">ID</th><th class="p-4 text-left">Estado</th><th class="p-4 text-left">Ações</th></tr>
+              </thead>
+              <tbody id="pagesTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section id="history" class="section">
+        <div class="glass rounded-2xl p-6">
+          <div class="flex justify-between gap-3 items-center">
+            <div><h2 class="text-xl font-black">Histórico</h2><p class="text-sm text-slate-400 mt-1">Eventos importantes do ADM.</p></div>
+            <button onclick="clearHistory()" class="px-4 py-2 rounded-xl bg-slate-800 text-sm font-bold">Limpar</button>
+          </div>
+          <div id="historyList" class="mt-5 space-y-2"></div>
+        </div>
+      </section>
+
+      <!-- BACKUP -->
+      <section id="backup" class="section">
+        <div class="grid xl:grid-cols-2 gap-5">
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-xl font-black">Snapshots</h2>
+            <p class="text-sm text-slate-400 mt-1">Antes de publicar, um snapshot é criado automaticamente.</p>
+            <div class="flex gap-2 mt-4">
+              <button onclick="createSnapshot('Snapshot manual', true)" class="px-4 py-2 rounded-xl bg-slate-800 font-bold text-sm">Criar snapshot</button>
+              <button onclick="restoreLastSnapshot()" class="px-4 py-2 rounded-xl bg-sky-600 font-bold text-sm">Restaurar último</button>
+            </div>
+            <div id="snapshotList" class="mt-5 space-y-2"></div>
+          </div>
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-xl font-black">Exportar / Importar</h2>
+            <p class="text-sm text-slate-400 mt-1">Use JSON para mover ou recuperar configurações.</p>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button onclick="exportProject()" class="px-4 py-2 rounded-xl bg-emerald-500 text-black font-black text-sm">Exportar projeto</button>
+              <label class="px-4 py-2 rounded-xl bg-slate-800 font-bold text-sm cursor-pointer">Importar projeto<input id="importFile2" type="file" accept=".json,application/json" class="hidden"></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] bg-[#101923] border border-slate-700 shadow-2xl rounded-xl px-5 py-3 text-sm font-bold">
+  <span id="toastText">OK</span>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="hidden fixed inset-0 z-[110] modal-backdrop items-center justify-center p-4">
+  <div class="glass rounded-2xl p-6 w-full max-w-md">
+    <h3 id="confirmTitle" class="text-lg font-black">Confirmar</h3>
+    <p id="confirmText" class="text-sm text-slate-400 mt-2"></p>
+    <div class="flex justify-end gap-2 mt-6">
+      <button onclick="closeConfirm(false)" class="px-4 py-2 rounded-xl bg-slate-800 font-bold">Cancelar</button>
+      <button id="confirmOk" onclick="closeConfirm(true)" class="px-4 py-2 rounded-xl bg-red-500 text-white font-black">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE = {
+  draft:"abravanel_admin_draft_v1",
+  pages:"abravanel_pages_v1",
+  history:"abravanel_history_v1",
+  snapshots:"abravanel_snapshots_v1",
+  sellers:"abravanel_sellers_v1",
+  branches:"abravanel_branches_v1"
+};
+
+const state = {
+  pages:[],
+  history:[],
+  snapshots:[],
+  sellers:[],
+  branches:[],
+  undoStack:[],
+  currentPersisted:null,
+  autosaveTimer:null,
+  previewLoaded:false,
+  previewText:"",
+  imageOk:null,
+  confirmResolver:null
+};
+
+const $ = id => document.getElementById(id);
+const field = id => $(id)?.value ?? "";
+const now = () => new Date().toLocaleString("pt-BR");
+
+function collectData(){
+  return {
+    meta:{schema:1,updatedAt:new Date().toISOString()},
+    branch:{code:field("branchCode").trim().toUpperCase()},
+    seller:{
+      id:field("sellerId").trim(),
+      name:field("sellerName").trim(),
+      firstName:field("sellerFirstName").trim(),
+      initial:field("sellerInitial").trim().toUpperCase(),
+      verifiedLabel:field("sellerStatus").trim(),
+      avatar:field("sellerAvatar").trim()
+    },
+    buyer:{
+      name:field("buyerName").trim(),
+      firstName:field("buyerFirstName").trim(),
+      city:field("buyerCity").trim(),
+      state:field("buyerState").trim().toUpperCase(),
+      cep:field("buyerCep").trim(),
+      region:field("buyerRegion").trim()
+    },
+    product:{
+      title:field("productTitle").trim(),
+      description:field("productDescription").trim(),
+      price:Number(field("productPrice")||0),
+      status:field("productStatus").trim(),
+      category:field("productCategory").trim(),
+      image:field("productImage").trim()
+    },
+    sale:{
+      pageId:field("pageId").trim().toUpperCase(),
+      internalName:field("internalName").trim(),
+      orderId:field("orderId").trim(),
+      transactionId:field("transactionId").trim(),
+      status:field("saleStatus"),
+      date:field("saleDate"),
+      publishState: getCurrentPage()?.sale?.publishState || "Rascunho"
+    },
+    assistant:{
+      name:field("assistantName").trim(),
+      voiceEnabled:field("voiceEnabled")==="true",
+      welcome:field("audioWelcome"),
+      instruction:field("audioInstruction")
+    }
+  };
+}
+
+function assignData(d){
+  if(!d)return;
+  setv("branchCode",d.branch?.code);
+  setv("sellerId",d.seller?.id);setv("sellerName",d.seller?.name);setv("sellerFirstName",d.seller?.firstName);
+  setv("sellerInitial",d.seller?.initial);setv("sellerStatus",d.seller?.verifiedLabel);setv("sellerAvatar",d.seller?.avatar);
+  setv("buyerName",d.buyer?.name);setv("buyerFirstName",d.buyer?.firstName);setv("buyerCity",d.buyer?.city);
+  setv("buyerState",d.buyer?.state);setv("buyerCep",d.buyer?.cep);setv("buyerRegion",d.buyer?.region);
+  setv("productTitle",d.product?.title);setv("productDescription",d.product?.description);setv("productPrice",d.product?.price);
+  setv("productStatus",d.product?.status);setv("productCategory",d.product?.category);setv("productImage",d.product?.image);
+  setv("pageId",d.sale?.pageId);setv("internalName",d.sale?.internalName);setv("orderId",d.sale?.orderId);
+  setv("transactionId",d.sale?.transactionId);setv("saleStatus",d.sale?.status);setv("saleDate",d.sale?.date);
+  setv("assistantName",d.assistant?.name);setv("voiceEnabled",String(d.assistant?.voiceEnabled ?? true));
+  setv("audioWelcome",d.assistant?.welcome);setv("audioInstruction",d.assistant?.instruction);
+  sync(false);
+}
+function setv(id,v){if($(id))$(id).value=v??""}
+
+function openSection(id){
+  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(x=>x.classList.toggle("active",x.dataset.section===id));
+  $(id)?.classList.add("active");
+  if(id==="preview") refreshPreview();
+  if(id==="diagnostics") runDiagnostics();
+  if(id==="backup") renderSnapshots();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>openSection(b.dataset.section)));
+
+function sync(track=true){
+  const d=collectData();
+  $("dashBranch").textContent=d.branch.code||"—";
+  $("dashSeller").textContent=d.seller.name||"—";
+  $("dashProduct").textContent=d.product.title||"—";
+  $("dashId").textContent=d.sale.pageId||"—";
+  $("topPageName").textContent=d.sale.internalName||d.sale.pageId||"Nova página";
+  $("imagePreview").src=d.product.image||"";
+  if(track) scheduleAutosave();
+  runDiagnostics(false);
+  applyPreviewData();
+}
+
+function scheduleAutosave(){
+  $("topSaveStatus").textContent="Alterações não salvas";
+  $("topSaveStatus").className="text-amber-400";
+  clearTimeout(state.autosaveTimer);
+  state.autosaveTimer=setTimeout(()=>saveDraft(false),700);
+}
+
+function saveDraft(manual=false){
+  const d=collectData();
+  localStorage.setItem(STORAGE.draft,JSON.stringify(d));
+  state.currentPersisted=JSON.stringify(d);
+  $("topSaveStatus").textContent="Salvo automaticamente";
+  $("topSaveStatus").className="text-emerald-400";
+  $("sidebarState").textContent="Rascunho salvo";
+  $("sidebarState").className="text-emerald-400";
+  if(manual){log("Rascunho salvo manualmente.");toast("Rascunho salvo.");}
+}
+
+function snapshotUndo(){
+  const d=collectData();
+  const s=JSON.stringify(d);
+  if(state.undoStack[state.undoStack.length-1]!==s){
+    state.undoStack.push(s);
+    if(state.undoStack.length>25)state.undoStack.shift();
+  }
+}
+function undoLast(){
+  if(state.undoStack.length<2){toast("Nada para desfazer.");return}
+  state.undoStack.pop();
+  const prev=JSON.parse(state.undoStack[state.undoStack.length-1]);
+  assignData(prev);saveDraft(false);log("Última alteração desfeita.");
+}
+
+document.querySelectorAll("input,textarea,select").forEach(el=>{
+  el.addEventListener("focus",snapshotUndo);
+  el.addEventListener("input",()=>sync(true));
+  el.addEventListener("change",()=>sync(true));
+});
+
+function uniqueRandom(chars,len,used){
+  for(let tries=0;tries<100;tries++){
+    const s=Array.from({length:len},()=>chars[Math.floor(Math.random()*chars.length)]).join("");
+    if(!used.has(s))return s;
+  }
+  return Date.now().toString(36).slice(-len).toUpperCase();
+}
+function randomBranch(){
+  const used=new Set(state.branches.map(x=>x.toUpperCase()));
+  const code=uniqueRandom("ABCDEFGHIJKLMNOPQRSTUVWXYZ",3,used);
+  $("branchCode").value=code;
+  if(!state.branches.includes(code)){state.branches.push(code);persistBranches()}
+  sync();toast("Nova sigla gerada: "+code);
+}
+function generatePageId(){
+  const used=new Set(state.pages.map(p=>p.sale.pageId));
+  $("pageId").value=uniqueRandom("ABCDEFGHJKLMNPQRSTUVWXYZ23456789",6,used);
+  sync();toast("Novo ID gerado.");
+}
+
+function persistBranches(){localStorage.setItem(STORAGE.branches,JSON.stringify(state.branches))}
+function persistPages(){localStorage.setItem(STORAGE.pages,JSON.stringify(state.pages))}
+function persistHistory(){localStorage.setItem(STORAGE.history,JSON.stringify(state.history))}
+function persistSnapshots(){localStorage.setItem(STORAGE.snapshots,JSON.stringify(state.snapshots))}
+function persistSellers(){localStorage.setItem(STORAGE.sellers,JSON.stringify(state.sellers))}
+
+function getCurrentPage(){
+  const id=field("pageId").toUpperCase();
+  return state.pages.find(p=>p.sale.pageId===id)||null;
+}
+
+function log(msg){
+  state.history.unshift({time:now(),msg});
+  state.history=state.history.slice(0,150);
+  persistHistory();renderHistory();
+}
+function renderHistory(){
+  $("historyList").innerHTML=state.history.length
+    ? state.history.map(x=>`<div class="pill rounded-xl p-3"><b class="text-emerald-400 text-xs">${esc(x.time)}</b><div class="text-slate-300 mt-1">${esc(x.msg)}</div></div>`).join("")
+    : `<div class="text-slate-500">Nenhum evento registrado.</div>`;
+}
+async function clearHistory(){
+  if(await confirmBox("Limpar histórico?","Essa ação remove apenas o histórico local do ADM.")){
+    state.history=[];persistHistory();renderHistory();toast("Histórico limpo.");
+  }
+}
+
+function createSnapshot(reason="Snapshot",show=false){
+  const snap={id:cryptoId(),time:new Date().toISOString(),label:reason,data:collectData()};
+  state.snapshots.unshift(snap);state.snapshots=state.snapshots.slice(0,20);persistSnapshots();renderSnapshots();
+  if(show)toast("Snapshot criado.");
+  return snap;
+}
+function renderSnapshots(){
+  $("snapshotList").innerHTML=state.snapshots.length?state.snapshots.map((s,i)=>`
+    <div class="pill rounded-xl p-3 flex items-center justify-between gap-3">
+      <div><b>${esc(s.label)}</b><div class="text-xs text-slate-500 mt-1">${new Date(s.time).toLocaleString("pt-BR")}</div></div>
+      <button onclick="restoreSnapshot(${i})" class="px-3 py-2 rounded-lg bg-slate-800 text-xs font-bold">Restaurar</button>
+    </div>`).join(""):`<div class="text-slate-500 text-sm">Nenhum snapshot ainda.</div>`;
+}
+async function restoreSnapshot(i){
+  const s=state.snapshots[i];if(!s)return;
+  if(await confirmBox("Restaurar snapshot?","Os campos atuais serão substituídos pelos dados desse snapshot.")){
+    assignData(s.data);saveDraft(false);log("Snapshot restaurado: "+s.label);toast("Snapshot restaurado.");
+  }
+}
+function restoreLastSnapshot(){if(state.snapshots.length)restoreSnapshot(0);else toast("Nenhum snapshot disponível.");}
+
+function saveSellerProfile(){
+  const d=collectData().seller;
+  if(!d.name){toast("Preencha o nome do vendedor.");return}
+  const idx=state.sellers.findIndex(x=>x.id===d.id || x.name.toLowerCase()===d.name.toLowerCase());
+  if(idx>=0)state.sellers[idx]=d;else state.sellers.push(d);
+  persistSellers();renderSellerProfiles();toast("Perfil do vendedor salvo.");
+}
+function renderSellerProfiles(){
+  $("sellerProfileSelect").innerHTML='<option value="">Selecionar perfil...</option>'+
+    state.sellers.map((s,i)=>`<option value="${i}">${esc(s.name)}</option>`).join("");
+}
+$("sellerProfileSelect").addEventListener("change",e=>{
+  if(e.target.value==="")return;
+  const s=state.sellers[Number(e.target.value)];if(!s)return;
+  setv("sellerId",s.id);setv("sellerName",s.name);setv("sellerFirstName",s.firstName);setv("sellerInitial",s.initial);
+  setv("sellerStatus",s.verifiedLabel);setv("sellerAvatar",s.avatar);sync();log("Perfil de vendedor carregado: "+s.name);
+});
+
+function validateVariables(showToast=false){
+  const d=collectData();
+  const allowed=["branch.code","seller.name","seller.firstName","buyer.name","buyer.firstName","product.title","product.price","assistant.name","sale.orderId","sale.transactionId"];
+  const combined=[d.assistant.welcome,d.assistant.instruction].join("\n");
+  const found=[...combined.matchAll(/\{\{\s*([^}]+?)\s*\}\}/g)].map(m=>m[1]);
+  const invalid=found.filter(v=>!allowed.includes(v));
+  if(showToast)toast(invalid.length?("Variáveis inválidas: "+invalid.join(", ")):"Variáveis válidas.");
+  return {ok:invalid.length===0,invalid};
+}
+
+function checkImage(show=false){
+  return new Promise(resolve=>{
+    const url=field("productImage");
+    if(!url){state.imageOk=false;$("imageCheck").innerHTML='<span class="text-red-400 font-bold">✕ URL vazia</span>';resolve(false);return}
+    const img=new Image();
+    const timer=setTimeout(()=>{state.imageOk=false;$("imageCheck").innerHTML='<span class="text-amber-400 font-bold">⚠ Tempo esgotado</span>';resolve(false)},5000);
+    img.onload=()=>{clearTimeout(timer);state.imageOk=true;$("imageCheck").innerHTML='<span class="text-emerald-400 font-bold">✓ Imagem carregou corretamente</span>';runDiagnostics(false);if(show)toast("Imagem válida.");resolve(true)};
+    img.onerror=()=>{clearTimeout(timer);state.imageOk=false;$("imageCheck").innerHTML='<span class="text-red-400 font-bold">✕ Não foi possível carregar a imagem</span>';runDiagnostics(false);if(show)toast("Imagem não carregou.");resolve(false)};
+    img.src=url+(url.includes("?")?"&":"?")+"_admcheck="+Date.now();
+  });
+}
+
+function templateScan(){
+  try{
+    const iframe=$("sitePreview");
+    const doc=iframe.contentDocument||iframe.contentWindow.document;
+    if(!doc||!doc.body)return {loaded:false,issues:["Template ainda não carregado"]};
+    const txt=(doc.body.innerText||"").toLowerCase();
+    const stale=[];
+    ["saxofone","carlos eduardo","olx pay"].forEach(term=>{if(txt.includes(term))stale.push(term)});
+    return {loaded:true,issues:stale};
+  }catch(e){
+    return {loaded:false,issues:["Preview não acessível nesta origem"]};
+  }
+}
+
+function basicChecks(){
+  const d=collectData();
+  const dupId=state.pages.some(p=>p.sale.pageId===d.sale.pageId && p!==getCurrentPage());
+  const vars=validateVariables(false);
+  const ts=templateScan();
+  const items=[
+    {name:"Filial configurada",ok:/^[A-Z]{2,5}$/.test(d.branch.code),section:"branch"},
+    {name:"Vendedor configurado",ok:!!d.seller.name,section:"seller"},
+    {name:"Comprador configurado",ok:!!d.buyer.name,section:"buyer"},
+    {name:"Cidade/UF configuradas",ok:!!d.buyer.city && /^[A-Z]{2}$/.test(d.buyer.state),section:"buyer"},
+    {name:"Produto configurado",ok:!!d.product.title,section:"product"},
+    {name:"Valor válido",ok:d.product.price>0,section:"product"},
+    {name:"Imagem principal informada",ok:!!d.product.image,section:"images"},
+    {name:"ID da página válido",ok:/^[A-Z0-9_-]{4,32}$/.test(d.sale.pageId),section:"sale"},
+    {name:"ID não duplicado",ok:!dupId,section:"sale"},
+    {name:"Variáveis do áudio válidas",ok:vars.ok,section:"audio"},
+    {name:"Template carregado",ok:ts.loaded,section:"preview"},
+    {name:"Sem textos antigos detectados",ok:ts.loaded && ts.issues.length===0,section:"preview"}
+  ];
+  if(state.imageOk!==null)items.push({name:"Imagem testada",ok:state.imageOk,section:"images"});
+  return items;
+}
+
+function runDiagnostics(show=false){
+  const items=basicChecks();
+  const ok=items.filter(x=>x.ok).length;
+  const score=Math.round(ok/items.length*100);
+  const fails=items.filter(x=>!x.ok);
+  setHealth(score,fails.length);
+
+  const mini=items.slice(0,6);
+  $("diagnosticMini").innerHTML=mini.map(x=>diagRow(x,true)).join("");
+  $("diagnosticFull").innerHTML=items.map(x=>diagRow(x,false)).join("");
+  $("diagMiniBadge").textContent=fails.length?`${fails.length} atenção`:"OK";
+  $("diagMiniBadge").className=`text-xs font-black px-2 py-1 rounded ${fails.length?"bg-amber-500/10 text-amber-400":"bg-emerald-500/10 text-emerald-400"}`;
+  $("diagSummaryText").textContent=fails.length?`${fails.length} item(ns) ainda precisam de atenção antes da publicação.`:"Todos os testes disponíveis passaram.";
+  if(show)toast(`Diagnóstico concluído: ${score}%`);
+  return {score,items,fails};
+}
+function diagRow(x,mini){
+  return `<button onclick="openSection('${x.section}')" class="w-full flex items-center justify-between gap-3 pill rounded-xl px-3 py-2.5 text-left">
+    <span class="${mini?'text-xs':'text-sm'}">${esc(x.name)}</span>
+    <span class="${x.ok?'text-emerald-400':'text-red-400'} font-black">${x.ok?'✓ OK':'✕ REVISAR'}</span>
+  </button>`;
+}
+function setHealth(score,failCount){
+  $("topHealth").textContent=score+"%";$("healthNumber").textContent=score+"%";$("diagHealthBig").textContent=score+"%";
+  $("healthBar").style.width=score+"%";$("diagHealthBar").style.width=score+"%";
+  const cls=score>=90?"text-emerald-400":score>=70?"text-amber-400":"text-red-400";
+  $("topHealth").className=cls+" font-black";$("healthLabel").className=cls+" text-xs mb-1";
+  $("healthLabel").textContent=score>=90?"Pronto":score>=70?"Revisar":"Incompleto";
+}
+function fixSimpleIssues(){
+  let changed=false;
+  if(!field("sellerFirstName") && field("sellerName")){setv("sellerFirstName",field("sellerName").split(/\s+/)[0]);changed=true}
+  if(!field("sellerInitial") && field("sellerName")){setv("sellerInitial",field("sellerName").trim()[0]?.toUpperCase());changed=true}
+  if(!field("buyerFirstName") && field("buyerName")){setv("buyerFirstName",field("buyerName").split(/\s+/)[0]);changed=true}
+  if(!field("internalName") && field("buyerName") && field("productTitle")){setv("internalName",`Venda ${field("buyerFirstName")||field("buyerName")} - ${field("productTitle")}`);changed=true}
+  if(!field("pageId")){generatePageId();changed=true}
+  sync();toast(changed?"Correções simples aplicadas.":"Nada simples para corrigir.");
+}
+
+function resolveVars(t,d){
+  const vars={
+    "{{branch.code}}":d.branch.code,
+    "{{seller.name}}":d.seller.name,
+    "{{seller.firstName}}":d.seller.firstName,
+    "{{buyer.name}}":d.buyer.name,
+    "{{buyer.firstName}}":d.buyer.firstName,
+    "{{product.title}}":d.product.title,
+    "{{product.price}}":d.product.price.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}),
+    "{{assistant.name}}":d.assistant.name,
+    "{{sale.orderId}}":d.sale.orderId,
+    "{{sale.transactionId}}":d.sale.transactionId
+  };
+  return Object.entries(vars).reduce((a,[k,v])=>a.split(k).join(v),t||"");
+}
+function testVoice(){
+  const d=collectData();if(!d.assistant.voiceEnabled){toast("A voz está desativada.");return}
+  if(!("speechSynthesis" in window)){toast("Navegador sem suporte a voz.");return}
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(resolveVars(d.assistant.welcome,d));u.lang="pt-BR";speechSynthesis.speak(u);
+}
+
+function setPreviewMode(mode){
+  $("previewStage").className="preview-stage "+mode;
+}
+$("sitePreview").addEventListener("load",()=>{
+  state.previewLoaded=true;
+  $("previewStatus").innerHTML='<span class="text-emerald-400 font-bold">✓ Template carregado.</span>';
+  applyPreviewData();runDiagnostics(false);
+});
+
+function refreshPreview(){
+  const iframe=$("sitePreview");
+  try{
+    iframe.contentWindow.location.reload();
+    $("previewStatus").textContent="Atualizando template...";
+  }catch(e){
+    iframe.src="template-master-v1.html?ts="+Date.now();
+  }
+}
+
+function applyPreviewData(){
+  if(!state.previewLoaded)return;
+  const d=collectData();
+  try{
+    const w=$("sitePreview").contentWindow;
+    const doc=$("sitePreview").contentDocument;
+    if(w.PAGE_DATA){
+      Object.assign(w.PAGE_DATA.branch,d.branch);
+      Object.assign(w.PAGE_DATA.seller,d.seller);
+      Object.assign(w.PAGE_DATA.buyer,d.buyer);
+      Object.assign(w.PAGE_DATA.product,d.product);
+      Object.assign(w.PAGE_DATA.sale,{
+        orderId:d.sale.orderId,
+        transactionId:d.sale.transactionId,
+        status:d.sale.status,
+        referenceCode:d.sale.pageId
+      });
+      Object.assign(w.PAGE_DATA.assistant,d.assistant);
+      if(typeof w.applyPageData==="function")w.applyPageData();
+      $("previewStatus").innerHTML='<span class="text-emerald-400 font-bold">✓ Preview sincronizado com o ADM.</span>';
+    }else{
+      // fallback de IDs conhecidos
+      const map={
+        brandLogoText:d.branch.code,displayBuyerName:d.buyer.name,
+        displayLocation:`${d.buyer.city}, ${d.buyer.state}`,
+        displayProductTitle:d.product.title
+      };
+      Object.entries(map).forEach(([id,val])=>{const el=doc.getElementById(id);if(el)el.textContent=val});
+      const price=Number(d.product.price||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+      ["displayProductPrice","badgeWalletVal","boxAmount","resumoPending","carteiraCustodyVal"].forEach(id=>{const el=doc.getElementById(id);if(el)el.textContent=price});
+      const img=doc.getElementById("productPhoto");if(img)img.src=d.product.image;
+      $("previewStatus").innerHTML='<span class="text-amber-400 font-bold">⚠ Preview aplicado em modo compatibilidade.</span>';
+    }
+  }catch(e){
+    $("previewStatus").innerHTML='<span class="text-red-400 font-bold">✕ O navegador bloqueou acesso ao template. Coloque admin-v1.html e template-master-v1.html no mesmo domínio/pasta.</span>';
+  }
+}
+
+
+async function publishPage() {
+  const d = collectData();
+
+  await checkImage(false);
+
+  const diag = runDiagnostics(false);
+
+  if (diag.score < 85) {
+    toast("Publicação bloqueada: diagnóstico abaixo de 85%.");
+    openSection("diagnostics");
+    return;
+  }
+
+  const confirmar = await confirmBox(
+    "Publicar página?",
+    "Os dados serão enviados ao GitHub e o Netlify fará o deploy."
+  );
+
+  if (!confirmar) return;
+
+  createSnapshot("Antes da publicação");
+
+  $("sidebarState").textContent = "Publicando...";
+  $("sidebarState").className = "text-amber-400";
+
+  $("topSaveStatus").textContent = "Enviando para GitHub...";
+  $("topSaveStatus").className = "text-amber-400";
+
+  try {
+    const resposta = await fetch(
+      "/.netlify/functions/save-page",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(d)
+      }
+    );
+
+    let resultado = {};
+
+    try {
+      resultado = await resposta.json();
+    } catch {
+      throw new Error(
+        "A função respondeu sem JSON válido. Verifique os logs da função no Netlify."
+      );
+    }
+
+    if (!resposta.ok || !resultado.ok) {
+      throw new Error(
+        resultado.error ||
+        `Falha na publicação (${resposta.status})`
+      );
+    }
+
+    d.sale.publishState = "Publicado";
+
+    const index = state.pages.findIndex(
+      p => p.sale.pageId === d.sale.pageId
+    );
+
+    if (index >= 0) {
+      state.pages[index] = d;
+    } else {
+      state.pages.push(d);
+    }
+
+    persistPages();
+    renderPages();
+    saveDraft(false);
+
+    $("sidebarState").textContent = "Publicado";
+    $("sidebarState").className = "text-emerald-400";
+
+    $("topSaveStatus").textContent = "GitHub atualizado";
+    $("topSaveStatus").className = "text-emerald-400";
+
+    log(
+      `Página ${d.sale.pageId} enviada ao GitHub. Commit: ${resultado.commitSha || "criado"}`
+    );
+
+    toast(
+      `Publicado: ${resultado.pageUrl || "/p/" + d.sale.pageId + "/"}`
+    );
+
+  } catch (erro) {
+    console.error("Erro ao publicar:", erro);
+
+    $("sidebarState").textContent = "Erro";
+    $("sidebarState").className = "text-red-400";
+
+    $("topSaveStatus").textContent = "Falha na publicação";
+    $("topSaveStatus").className = "text-red-400";
+
+    log(
+      "Erro de publicação: " +
+      (erro?.message || "erro desconhecido")
+    );
+
+    toast(
+      "Erro: " +
+      (erro?.message || "falha ao publicar")
+    );
+  }
+}
+
+function renderPages(){
+  $("pagesTable").innerHTML=state.pages.length?state.pages.map((p,i)=>`
+    <tr class="table-row border-t border-slate-800">
+      <td class="p-4 font-bold">${esc(p.sale.internalName||"Sem nome")}</td>
+      <td class="p-4">${esc(p.branch.code)}</td><td class="p-4">${esc(p.seller.name)}</td>
+      <td class="p-4">${esc(p.product.title)}</td><td class="p-4">${esc(p.buyer.name)}</td>
+      <td class="p-4 terminal text-emerald-400">${esc(p.sale.pageId)}</td>
+      <td class="p-4"><span class="px-2 py-1 rounded bg-slate-800 text-xs">${esc(p.sale.publishState||p.sale.status||"Rascunho")}</span></td>
+      <td class="p-4 whitespace-nowrap">
+        <button onclick="loadPage(${i})" class="px-2.5 py-1.5 rounded bg-slate-800 mr-1">Editar</button>
+        <button onclick="duplicatePage(${i})" class="px-2.5 py-1.5 rounded bg-slate-800 mr-1">Duplicar</button>
+        <button onclick="deletePage(${i})" class="px-2.5 py-1.5 rounded bg-red-500/15 text-red-400">Excluir</button>
+      </td>
+    </tr>`).join(""):`<tr><td colspan="8" class="p-8 text-center text-slate-500">Nenhuma página salva ainda.</td></tr>`;
+}
+function loadPage(i){
+  const p=state.pages[i];if(!p)return;createSnapshot("Antes de carregar outra página");
+  assignData(p);snapshotUndo();openSection("dashboard");log("Página carregada: "+p.sale.pageId);toast("Página carregada.");
+}
+function duplicatePage(i){
+  const p=JSON.parse(JSON.stringify(state.pages[i]));if(!p)return;
+  const used=new Set(state.pages.map(x=>x.sale.pageId));
+  p.sale.pageId=uniqueRandom("ABCDEFGHJKLMNPQRSTUVWXYZ23456789",6,used);
+  p.sale.internalName=(p.sale.internalName||"Página")+" - cópia";
+  p.sale.publishState="Rascunho";state.pages.push(p);persistPages();renderPages();log("Página duplicada: "+p.sale.pageId);toast("Cópia criada.");
+}
+async function deletePage(i){
+  const p=state.pages[i];if(!p)return;
+  if(await confirmBox("Excluir página?","A página "+p.sale.pageId+" será removida da lista local. Um snapshot será criado antes.")){
+    createSnapshot("Antes de excluir "+p.sale.pageId);state.pages.splice(i,1);persistPages();renderPages();log("Página excluída: "+p.sale.pageId);toast("Página excluída.");
+  }
+}
+function newPage(){
+  createSnapshot("Antes de nova página");
+  generatePageId();setv("internalName","");setv("saleStatus","Rascunho");
+  $("sidebarState").textContent="Novo rascunho";$("sidebarState").className="text-amber-400";
+  openSection("seller");log("Nova página iniciada.");
+}
+
+function exportProject(){
+  const payload={
+    schema:1,exportedAt:new Date().toISOString(),
+    current:collectData(),pages:state.pages,sellers:state.sellers,branches:state.branches,snapshots:state.snapshots
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`abravanel-admin-${field("pageId")||"projeto"}.json`;a.click();URL.revokeObjectURL(a.href);
+  log("Projeto exportado em JSON.");toast("Projeto exportado.");
+}
+async function importProjectFile(file){
+  try{
+    const data=JSON.parse(await file.text());
+    if(data.current)assignData(data.current);
+    if(Array.isArray(data.pages))state.pages=data.pages;
+    if(Array.isArray(data.sellers))state.sellers=data.sellers;
+    if(Array.isArray(data.branches))state.branches=data.branches;
+    if(Array.isArray(data.snapshots))state.snapshots=data.snapshots.slice(0,20);
+    persistPages();persistSellers();persistBranches();persistSnapshots();
+    renderPages();renderSellerProfiles();renderSnapshots();sync(false);saveDraft(false);
+    log("Projeto importado de arquivo JSON.");toast("Importação concluída.");
+  }catch(e){toast("JSON inválido ou incompatível.");}
+}
+["importFile","importFile2"].forEach(id=>$(id).addEventListener("change",e=>{const f=e.target.files[0];if(f)importProjectFile(f)}));
+
+function toast(msg){
+  $("toastText").textContent=msg;$("toast").classList.add("show");
+  clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2800);
+}
+function confirmBox(title,text){
+  $("confirmTitle").textContent=title;$("confirmText").textContent=text;
+  $("confirmModal").classList.remove("hidden");$("confirmModal").classList.add("flex");
+  return new Promise(resolve=>state.confirmResolver=resolve);
+}
+function closeConfirm(result){
+  $("confirmModal").classList.add("hidden");$("confirmModal").classList.remove("flex");
+  if(state.confirmResolver){state.confirmResolver(result);state.confirmResolver=null}
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function cryptoId(){return (crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2))}
+
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();saveDraft(true)}
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();openSection("preview")}
+});
+
+(function init(){
+  try{state.pages=JSON.parse(localStorage.getItem(STORAGE.pages)||"[]")}catch{}
+  try{state.history=JSON.parse(localStorage.getItem(STORAGE.history)||"[]")}catch{}
+  try{state.snapshots=JSON.parse(localStorage.getItem(STORAGE.snapshots)||"[]")}catch{}
+  try{state.sellers=JSON.parse(localStorage.getItem(STORAGE.sellers)||"[]")}catch{}
+  try{state.branches=JSON.parse(localStorage.getItem(STORAGE.branches)||"[]")}catch{}
+  const draft=localStorage.getItem(STORAGE.draft);
+  if(draft){try{assignData(JSON.parse(draft));$("topSaveStatus").textContent="Rascunho recuperado";$("sidebarState").textContent="Rascunho recuperado"}catch{}}
+  snapshotUndo();renderPages();renderHistory();renderSnapshots();renderSellerProfiles();sync(false);checkImage(false);
+})();
+</script>
+</body>
+</html>
