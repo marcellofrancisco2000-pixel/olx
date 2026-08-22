@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema": 1,
-    "updatedAt": "2026-08-22T15:23:14.420Z",
+    "updatedAt": "2026-08-22T15:51:36.929Z",
     "published": true
   },
   "branch": {
@@ -9,9 +9,9 @@
   },
   "seller": {
     "id": "seller_001",
-    "name": "Marcelo Santos",
-    "firstName": "Marcelo",
-    "initial": "M",
+    "name": "Patricia Medina",
+    "firstName": "Patricia",
+    "initial": "P",
     "verifiedLabel": "Vendedor Verificado",
     "avatar": ""
   },
@@ -36,10 +36,10 @@
     "internalName": "Venda Osmar - Cômoda",
     "orderId": "992014883",
     "transactionId": "TX-992014883",
-    "referenceCode": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-    "status": "Pendente",
+    "referenceCode": "PIX AQUI PORRAA ABRAVANEL Q TA",
+    "status": "Rascunho",
     "date": "",
-    "publishState": "Publicado"
+    "publishState": "Rascunho"
   },
   "assistant": {
     "name": "Ana",
