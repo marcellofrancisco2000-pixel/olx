@@ -296,6 +296,7 @@ code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius
             <div><label class="label">Nome interno</label><input id="internalName" class="field w-full mt-2 rounded-xl px-4 py-3" value="Venda Osmar - Cômoda"></div>
             <div><label class="label">ID do pedido</label><input id="orderId" class="field w-full mt-2 rounded-xl px-4 py-3 terminal" value="992014883"></div>
             <div><label class="label">ID da transação</label><input id="transactionId" class="field w-full mt-2 rounded-xl px-4 py-3 terminal" value="TX-992014883"></div>
+            <div><label class="label">Código de referência da venda</label><input id="referenceCode" class="field w-full mt-2 rounded-xl px-4 py-3 terminal" value="XLO-992014883" placeholder="Ex.: XLO-992014883"></div>
             <div><label class="label">Status</label><select id="saleStatus" class="field w-full mt-2 rounded-xl px-4 py-3"><option>Rascunho</option><option>Pendente</option><option>Processando</option><option>Concluído</option><option>Cancelado</option></select></div>
             <div><label class="label">Data</label><input id="saleDate" type="date" class="field w-full mt-2 rounded-xl px-4 py-3"></div>
           </div>
@@ -692,6 +693,7 @@ function collectData(){
       internalName:field("internalName").trim(),
       orderId:field("orderId").trim(),
       transactionId:field("transactionId").trim(),
+      referenceCode:field("referenceCode").trim(),
       status:field("saleStatus"),
       date:field("saleDate"),
       publishState: getCurrentPage()?.sale?.publishState || "Rascunho"
@@ -715,7 +717,7 @@ function assignData(d){
   setv("productTitle",d.product?.title);setv("productDescription",d.product?.description);setv("productPrice",d.product?.price);
   setv("productStatus",d.product?.status);setv("productCategory",d.product?.category);setv("productImage",d.product?.image);
   setv("pageId",d.sale?.pageId);setv("internalName",d.sale?.internalName);setv("orderId",d.sale?.orderId);
-  setv("transactionId",d.sale?.transactionId);setv("saleStatus",d.sale?.status);setv("saleDate",d.sale?.date);
+  setv("transactionId",d.sale?.transactionId);setv("referenceCode",d.sale?.referenceCode);setv("saleStatus",d.sale?.status);setv("saleDate",d.sale?.date);
   setv("assistantName",d.assistant?.name);setv("voiceEnabled",String(d.assistant?.voiceEnabled ?? true));
   setv("audioWelcome",d.assistant?.welcome);setv("audioInstruction",d.assistant?.instruction);
   sync(false);
@@ -1024,7 +1026,7 @@ function applyPreviewData(){
         orderId:d.sale.orderId,
         transactionId:d.sale.transactionId,
         status:d.sale.status,
-        referenceCode:d.sale.pageId
+        referenceCode:d.sale.referenceCode || d.sale.pageId
       });
       Object.assign(w.PAGE_DATA.assistant,d.assistant);
       if(typeof w.applyPageData==="function")w.applyPageData();
