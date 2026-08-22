@@ -58,6 +58,7 @@ code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius
 
     <div class="p-3">
       <button class="nav-btn active w-full text-left px-4 py-3 rounded-xl" data-section="dashboard"><i class="fa-solid fa-gauge-high w-6"></i>Dashboard</button>
+      <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="github"><i class="fa-brands fa-github w-6"></i>Conexão GitHub</button>
       <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="branch"><i class="fa-solid fa-code-branch w-6"></i>Filial</button>
       <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="seller"><i class="fa-solid fa-user-shield w-6"></i>Vendedor</button>
       <button class="nav-btn w-full text-left px-4 py-3 rounded-xl" data-section="buyer"><i class="fa-solid fa-user w-6"></i>Comprador</button>
@@ -78,6 +79,7 @@ code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius
         <div class="flex justify-between"><span class="text-slate-400">Template</span><b class="text-emerald-400">V1</b></div>
         <div class="flex justify-between"><span class="text-slate-400">Estado</span><b id="sidebarState" class="text-amber-400">Rascunho</b></div>
         <div class="flex justify-between"><span class="text-slate-400">Autosave</span><b id="autosaveState" class="text-sky-400">Ativo</b></div>
+        <div class="flex justify-between"><span class="text-slate-400">GitHub</span><b id="sidebarGithubState" class="text-red-400">Off</b></div>
       </div>
     </div>
   </aside>
@@ -177,6 +179,44 @@ code.var{color:#7ee7ff;background:#07131a;border:1px solid #173746;border-radius
                 Importar JSON<input id="importFile" type="file" accept=".json,application/json" class="hidden">
               </label>
             </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- CONEXÃO GITHUB -->
+      <section id="github" class="section">
+        <div class="glass rounded-2xl p-6 max-w-4xl">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-black">Conexão GitHub da sessão</h2>
+              <p class="text-sm text-slate-400 mt-1">O token fica apenas na memória desta aba. Não é salvo no localStorage nem em arquivos do site.</p>
+            </div>
+            <span id="githubSessionBadge" class="text-xs font-black px-3 py-2 rounded-xl bg-red-500/10 text-red-400">DESCONECTADO</span>
+          </div>
+
+          <div class="mt-5">
+            <label class="label">Fine-grained Personal Access Token</label>
+            <div class="grid md:grid-cols-[1fr_auto_auto] gap-2 mt-2">
+              <input id="githubSessionToken" type="password" autocomplete="off" spellcheck="false"
+                class="field w-full rounded-xl px-4 py-3 terminal"
+                placeholder="github_pat_...">
+              <button onclick="connectGitHubSession()" class="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black">
+                <i class="fa-solid fa-plug mr-2"></i>Iniciar
+              </button>
+              <button onclick="disconnectGitHubSession()" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold">
+                Desconectar
+              </button>
+            </div>
+          </div>
+
+          <div id="githubSessionInfo" class="pill rounded-xl p-4 mt-5 text-sm text-slate-400">
+            Cole o token e clique em <b class="text-white">Iniciar</b>.
+          </div>
+
+          <div class="mt-4 text-xs text-slate-500">
+            Repositório configurado na Function: <span class="terminal">marcellofrancisco2000-pixel/olx</span> · branch <span class="terminal">main</span>.
+            Ao atualizar ou fechar esta página, a sessão é perdida e o token precisa ser informado novamente.
           </div>
         </div>
       </section>
@@ -520,6 +560,100 @@ const state = {
   imageOk:null,
   confirmResolver:null
 };
+
+
+// Token GitHub apenas em memória desta aba. NÃO salvar em localStorage/sessionStorage.
+let SESSION_GITHUB_TOKEN = "";
+
+function authHeaders(extra = {}){
+  const headers = {...extra};
+  if(SESSION_GITHUB_TOKEN){
+    headers["Authorization"] = `Bearer ${SESSION_GITHUB_TOKEN}`;
+  }
+  return headers;
+}
+
+function updateGitHubSessionUI(connected=false, detail=""){
+  const badge = $("githubSessionBadge");
+  const info = $("githubSessionInfo");
+  const side = $("sidebarGithubState");
+
+  if(side){
+    side.textContent = connected ? "On" : "Off";
+    side.className = connected ? "text-emerald-400" : "text-red-400";
+  }
+
+  if(badge){
+    badge.textContent = connected ? "CONECTADO" : "DESCONECTADO";
+    badge.className = `text-xs font-black px-3 py-2 rounded-xl ${
+      connected ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+    }`;
+  }
+
+  if(info){
+    info.innerHTML = connected
+      ? `<span class="text-emerald-400 font-black">✓ GitHub conectado nesta sessão.</span>${detail ? `<div class="mt-2 text-slate-400">${esc(detail)}</div>` : ""}`
+      : (detail ? `<span class="text-red-400 font-black">✕ ${esc(detail)}</span>` : 'Cole o token e clique em <b class="text-white">Iniciar</b>.');
+  }
+}
+
+async function connectGitHubSession(){
+  const input = $("githubSessionToken");
+  const token = (input?.value || "").trim();
+
+  if(!token){
+    toast("Cole o token do GitHub.");
+    return;
+  }
+
+  SESSION_GITHUB_TOKEN = token;
+
+  try{
+    const res = await fetch("/.netlify/functions/save-page?debug=1", {
+      method:"GET",
+      cache:"no-store",
+      headers:authHeaders({"Accept":"application/json"})
+    });
+
+    const text = await res.text();
+    let data = {};
+    try{ data = JSON.parse(text); }catch{ data = {error:text}; }
+
+    if(!res.ok || !data.ok){
+      SESSION_GITHUB_TOKEN = "";
+      updateGitHubSessionUI(false, data?.github?.message || data?.error || `HTTP ${res.status}`);
+      toast("Token recusado pelo GitHub.");
+      return;
+    }
+
+    if(input) input.value = "";
+    updateGitHubSessionUI(
+      true,
+      `${data?.github?.message || "Repositório acessível"} · branch ${data?.env?.branch || "main"}`
+    );
+    toast("GitHub conectado nesta sessão.");
+  }catch(err){
+    SESSION_GITHUB_TOKEN = "";
+    updateGitHubSessionUI(false, err?.message || "Erro de rede");
+    toast("Falha ao testar a conexão.");
+  }
+}
+
+function disconnectGitHubSession(){
+  SESSION_GITHUB_TOKEN = "";
+  const input = $("githubSessionToken");
+  if(input) input.value = "";
+  updateGitHubSessionUI(false);
+  toast("Sessão GitHub desconectada.");
+}
+
+function requireGitHubSession(){
+  if(SESSION_GITHUB_TOKEN) return true;
+  openSection("github");
+  updateGitHubSessionUI(false, "Informe o token antes de publicar ou executar testes do GitHub.");
+  toast("Conecte o GitHub primeiro.");
+  return false;
+}
 
 const $ = id => document.getElementById(id);
 const field = id => $(id)?.value ?? "";
@@ -915,6 +1049,7 @@ function applyPreviewData(){
 
 
 async function publishPage() {
+  if(!requireGitHubSession()) return;
   const d = collectData();
 
   await checkImage(false);
@@ -941,10 +1076,10 @@ async function publishPage() {
   try {
     const resposta = await fetch("/.netlify/functions/save-page", {
       method: "POST",
-      headers: {
+      headers: authHeaders({
         "Content-Type": "application/json",
         "Accept": "application/json"
-      },
+      }),
       body: JSON.stringify(d)
     });
 
@@ -1150,6 +1285,15 @@ async function readResponseSafely(res){
 
 async function debugFunctionHealth(){
   clearDebug();
+  if(!SESSION_GITHUB_TOKEN){
+    setDbg("dbgFunctionState","SEM TOKEN","text-amber-400 font-black");
+    setDbg("dbgGithubState","DESCONECTADO","text-amber-400 font-black");
+    if($("dbgFunctionHealth")) $("dbgFunctionHealth").innerHTML =
+      '<div class="text-amber-400 font-black">⚠ GitHub não conectado</div>'+
+      '<div class="text-xs text-slate-400 mt-2">Abra Conexão GitHub, informe o token e clique em Iniciar.</div>';
+    addDebugCheck("Sessão GitHub",false,"Token não informado nesta aba");
+    return {ok:false,stage:"session-token",status:401};
+  }
   setDbg("dbgOrigin",location.origin);
   setDbg("dbgEndpoint",DEBUG_ENDPOINT);
   setDbg("dbgPageId",field("pageId")||"-");
@@ -1160,7 +1304,7 @@ async function debugFunctionHealth(){
     const res=await fetch(DEBUG_ENDPOINT+"?debug=1",{
       method:"GET",
       cache:"no-store",
-      headers:{"Accept":"application/json"}
+      headers:authHeaders({"Accept":"application/json"})
     });
     const body=await readResponseSafely(res);
     setDbg("dbgLastHttp",String(res.status));
@@ -1230,7 +1374,7 @@ async function debugPublishPost(){
   try{
     const res=await fetch(DEBUG_ENDPOINT+"?debugPost=1",{
       method:"POST",
-      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      headers:authHeaders({"Content-Type":"application/json","Accept":"application/json"}),
       body:JSON.stringify({...d,__debug:true})
     });
     const body=await readResponseSafely(res);
@@ -1252,6 +1396,12 @@ async function debugPublishPost(){
 
 async function runSuperDebug(){
   clearDebug();
+  if(!SESSION_GITHUB_TOKEN){
+    addDebugCheck("Sessão GitHub",false,"Token não informado nesta aba");
+    setDbg("debugFinalBadge","Conecte o GitHub","text-xs font-black px-2 py-1 rounded bg-amber-500/10 text-amber-400");
+    dbgLog("CONCLUSÃO","Abra Conexão GitHub, cole o token e clique em Iniciar antes de executar o Super Debug.","warn");
+    return;
+  }
   setDbg("dbgOrigin",location.origin);
   setDbg("dbgEndpoint",DEBUG_ENDPOINT);
   setDbg("dbgPageId",field("pageId")||"-");
