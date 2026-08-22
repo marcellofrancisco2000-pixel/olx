@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Carregando página...</title>
+
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f2f4f5;
+      font-family: Arial, sans-serif;
+    }
+
+    #loading {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #555;
+      font-size: 14px;
+    }
+
+    #siteFrame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: none;
+      background: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loading">
+    Carregando página...
+  </div>
+
+  <iframe
+    id="siteFrame"
+    src="/template-master-v1.html"
+    title="Página">
+  </iframe>
+
+  <script>
+    function pegarIdDaURL() {
+      const partes = window.location.pathname
+        .split("/")
+        .filter(Boolean);
+
+      const posicaoP = partes.indexOf("p");
+
+      if (posicaoP === -1) {
+        return "";
+      }
+
+      const id = partes[posicaoP + 1];
+
+      return id
+        ? id.toUpperCase()
+        : "";
+    }
+
+
+    function mostrarErro(mensagem) {
+      const loading = document.getElementById("loading");
+
+      loading.innerHTML = `
+        <div>
+          <strong>${mensagem}</strong>
+        </div>
+      `;
+    }
+
+
+    function aplicarDadosNoTemplate(iframe, dados) {
+      const janela = iframe.contentWindow;
+
+      if (!janela) {
+        throw new Error("Template não disponível.");
+      }
+
+
+      /*
+        MÉTODO PRINCIPAL
+
+        Nosso template-master-v1.html já foi preparado
+        para trabalhar com PAGE_DATA.
+
+        Então vamos alterar o PAGE_DATA da página
+        e depois mandar o template atualizar a tela.
+      */
+
+      if (
+        janela.PAGE_DATA &&
+        typeof janela.applyPageData === "function"
+      ) {
+
+        Object.assign(
+          janela.PAGE_DATA.branch,
+          dados.branch || {}
+        );
+
+
+        Object.assign(
+          janela.PAGE_DATA.seller,
+          dados.seller || {}
+        );
+
+
+        Object.assign(
+          janela.PAGE_DATA.buyer,
+          dados.buyer || {}
+        );
+
+
+        Object.assign(
+          janela.PAGE_DATA.product,
+          dados.product || {}
+        );
+
+
+        Object.assign(
+          janela.PAGE_DATA.sale,
+          dados.sale || {}
+        );
+
+
+        Object.assign(
+          janela.PAGE_DATA.assistant,
+          dados.assistant || {}
+        );
+
+
+        janela.applyPageData();
+
+        return;
+      }
+
+
+      /*
+        MODO DE SEGURANÇA
+
+        Se futuramente alguma função do template
+        mudar, tentamos preencher alguns campos
+        diretamente.
+      */
+
+      const documento = iframe.contentDocument;
+
+
+      const colocarTexto = (
+        id,
+        valor
+      ) => {
+
+        const elemento =
+          documento.getElementById(id);
+
+        if (elemento) {
+          elemento.textContent =
+            valor ?? "";
+        }
+      };
+
+
+      colocarTexto(
+        "brandLogoText",
+        dados.branch?.code
+      );
+
+
+      colocarTexto(
+        "displayBuyerName",
+        dados.buyer?.name
+      );
+
+
+      colocarTexto(
+        "displayLocation",
+        [
+          dados.buyer?.city,
+          dados.buyer?.state
+        ]
+          .filter(Boolean)
+          .join(", ")
+      );
+
+
+      colocarTexto(
+        "displayProductTitle",
+        dados.product?.title
+      );
+
+
+      if (
+        typeof dados.product?.price === "number"
+      ) {
+
+        const preco =
+          dados.product.price.toLocaleString(
+            "pt-BR",
+            {
+              style: "currency",
+              currency: "BRL"
+            }
+          );
+
+
+        colocarTexto(
+          "displayProductPrice",
+          preco
+        );
+      }
+
+
+      const imagem =
+        documento.getElementById(
+          "productPhoto"
+        );
+
+
+      if (
+        imagem &&
+        dados.product?.image
+      ) {
+
+        imagem.src =
+          dados.product.image;
+      }
+    }
+
+
+    async function carregarPagina() {
+      const id =
+        pegarIdDaURL();
+
+
+      if (!id) {
+        mostrarErro(
+          "ID da página não informado."
+        );
+
+        return;
+      }
+
+
+      const iframe =
+        document.getElementById(
+          "siteFrame"
+        );
+
+
+      const loading =
+        document.getElementById(
+          "loading"
+        );
+
+
+      try {
+
+        /*
+          Exemplo:
+
+          URL:
+          /p/A7K29P/
+
+          Arquivo procurado:
+          /data/pages/A7K29P.json
+        */
+
+        const resposta =
+          await fetch(
+            `/data/pages/${encodeURIComponent(id)}.json`,
+            {
+              cache: "no-store"
+            }
+          );
+
+
+        if (!resposta.ok) {
+
+          throw new Error(
+            "Página não encontrada."
+          );
+        }
+
+
+        const dados =
+          await resposta.json();
+
+
+        const executar =
+          function () {
+
+            try {
+
+              aplicarDadosNoTemplate(
+                iframe,
+                dados
+              );
+
+
+              document.title =
+                `${
+                  dados.product?.title ||
+                  "Página"
+                } - ${
+                  dados.branch?.code ||
+                  ""
+                }`;
+
+
+              loading.style.display =
+                "none";
+
+
+              iframe.style.display =
+                "block";
+
+
+            } catch (erro) {
+
+              console.error(
+                "Erro ao aplicar dados:",
+                erro
+              );
+
+
+              mostrarErro(
+                "Erro ao carregar os dados da página."
+              );
+            }
+          };
+
+
+        /*
+          Esperamos o template terminar
+          de carregar antes de alterar os dados.
+        */
+
+        if (
+          iframe.contentDocument &&
+          iframe.contentDocument.readyState ===
+            "complete"
+        ) {
+
+          executar();
+
+        } else {
+
+          iframe.addEventListener(
+            "load",
+            executar,
+            {
+              once: true
+            }
+          );
+        }
+
+
+      } catch (erro) {
+
+        console.error(
+          "Erro ao carregar página:",
+          erro
+        );
+
+
+        mostrarErro(
+          "Página não encontrada ou ainda não publicada."
+        );
+      }
+    }
+
+
+    carregarPagina();
+  </script>
+
+</body>
+</html>
