@@ -1,13 +1,12 @@
 {
   "meta": {
     "schema": 1,
-    "status": "published"
+    "updatedAt": "2026-08-22T13:08:10.324Z",
+    "published": true
   },
-
   "branch": {
-    "code": "XLO"
+    "code": "ABRAV"
   },
-
   "seller": {
     "id": "seller_001",
     "name": "Patricia Medina",
@@ -16,7 +15,6 @@
     "verifiedLabel": "Vendedor Verificado",
     "avatar": ""
   },
-
   "buyer": {
     "name": "Osmar Britz",
     "firstName": "Osmar",
@@ -25,33 +23,27 @@
     "cep": "",
     "region": ""
   },
-
   "product": {
     "title": "Cômoda",
     "description": "Cômoda",
     "price": 260,
     "status": "VENDIDO",
     "category": "",
-    "image": "https://img.olx.com.br/images/85/853630792833876.webp"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbplY3peJz9ury790NJtQuEHCyyfl6Q3O4ZA8_wxu0cg&s=10"
   },
-
   "sale": {
     "pageId": "A7K29P",
     "internalName": "Venda Osmar - Cômoda",
     "orderId": "992014883",
-    "transactionId": "TX-992014883",
+    "transactionId": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "status": "Rascunho",
-    "date": ""
+    "date": "",
+    "publishState": "Rascunho"
   },
-
   "assistant": {
     "name": "Ana",
     "voiceEnabled": true,
-
-    "welcome":
-      "Olá, {{buyer.firstName}}! Sou a {{assistant.name}} da {{branch.code}}.",
-
-    "instruction":
-      "Esta página mostra os detalhes da venda de {{product.title}}."
+    "welcome": "Olá, {{buyer.firstName}}! Sou a {{assistant.name}} da {{branch.code}}.",
+    "instruction": "Esta página mostra os detalhes da venda de {{product.title}}."
   }
 }
