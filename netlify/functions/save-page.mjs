@@ -13,9 +13,12 @@ export default async (req) => {
     // ============================================================
     if (req.method === "GET") {
       const token = process.env.GITHUB_TOKEN || "";
-      const owner = process.env.GITHUB_OWNER || "";
-      const repo = process.env.GITHUB_REPO || "";
-      const branch = process.env.GITHUB_BRANCH || "main";
+
+// EDITE SOMENTE ESTAS DUAS LINHAS
+const owner = "marcellofrancisco2000-pixel";
+const repo = "olx";
+
+const branch = "main";
 
       const missing = [];
 
